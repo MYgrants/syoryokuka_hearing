@@ -182,7 +182,7 @@
 /* ================= 管理者用の設定（ここだけ編集してください） ================= */
 var CONFIG = {
   // Apps ScriptのウェブアプリのURL（「…/exec」で終わるもの）を、引用符の中に貼り付けてください
-  ENDPOINT: 'https://script.google.com/macros/s/AKfycbw-71vuTfH00vxrf-exbkHseE2xnx0sDeWXhUQddMbBhxbJFZtMOnq73arJApS5yTXz/exec',
+  ENDPOINT: '',
   // 入力途中の内容を、お客様の端末に保持する時間（時間）
   DRAFT_HOURS: 24
 };
@@ -1517,7 +1517,7 @@ var FORM_DEF = {
         var asIs = file.size <= ASIS_BYTES && longSide <= MAX_SIDE && /^image\/(jpeg|png)$/.test(file.type);
         if (asIs) {
           readAsBase64(file).then(function (b64) {
-            resolve({ name: file.name, mime: file.type, b64: b64, w: w, h: hgt, bytes: file.size, thumb: url });
+            resolve({ name: file.name, mime: file.type, b64: b64, w: w, h: hgt, bytes: file.size, thumb: url, origName: file.name });
           }, function () { URL.revokeObjectURL(url); reject(new Error('read')); });
           return;
         }
@@ -1527,7 +1527,7 @@ var FORM_DEF = {
         ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, cw, ch); ctx.drawImage(img, 0, 0, cw, ch);
         var q = QUALITY, data = canvas.toDataURL('image/jpeg', q);
         while (dataBytes(data) > MAX_PHOTO_BYTES && q > 0.6) { q -= 0.08; data = canvas.toDataURL('image/jpeg', q); }
-        resolve({ name: baseName(file.name) + '.jpg', mime: 'image/jpeg', b64: data.split(',')[1], w: cw, h: ch, bytes: dataBytes(data), thumb: url });
+        resolve({ name: /\.jpe?g$/i.test(file.name) ? file.name : baseName(file.name) + '.jpg', mime: 'image/jpeg', b64: data.split(',')[1], w: cw, h: ch, bytes: dataBytes(data), thumb: url, origName: file.name });
       };
       img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('decode')); };
       img.src = url;
@@ -1638,7 +1638,7 @@ var FORM_DEF = {
       var p = { status: 'processing', name: f.name, caption: '', source: '', url: '' };
       PH.list.push(p);
       processFile(f).then(function (r) {
-        p.status = 'ready'; p.name = r.name; p.mime = r.mime; p.b64 = r.b64; p.w = r.w; p.h = r.h; p.bytes = r.bytes; p.thumb = r.thumb;
+        p.status = 'ready'; p.name = r.name; p.mime = r.mime; p.b64 = r.b64; p.w = r.w; p.h = r.h; p.bytes = r.bytes; p.thumb = r.thumb; p.origName = r.origName;
         refreshPhotos();
       }, function () {
         var i = PH.list.indexOf(p); if (i >= 0) PH.list.splice(i, 1);
@@ -1668,7 +1668,7 @@ var FORM_DEF = {
   }
   function photosPayload() {
     return PH.list.map(function (p) {
-      return { name: p.name, mime: p.mime, data: p.b64, caption: (p.caption || '').trim(), source: p.source, url: p.source === 'own' ? '' : (p.url || '').trim() };
+      return { name: p.name, origName: p.origName || p.name, mime: p.mime, data: p.b64, caption: (p.caption || '').trim(), source: p.source, url: p.source === 'own' ? '' : (p.url || '').trim() };
     });
   }
 
@@ -1772,7 +1772,7 @@ var FORM_DEF = {
     var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, hasPhotos ? 240000 : 90000) : null;
     fetch(CONFIG.ENDPOINT, {
       method: 'POST',
-      body: JSON.stringify({ rid: RID, answers: a, hp: elHp ? elHp.value : '', photos: photosPayload(), photoConsent: PH.list.length ? PH.consent : false, hpPhoto: HP.permission ? { permission: HP.permission, url: HP.url.trim(), note: HP.note.trim(), confirmed: HP.permission === 'yes' && PH.consent } : null }),
+      body: JSON.stringify({ rid: RID, answers: a, hp: elHp ? elHp.value : '', photos: photosPayload(), photoConsent: PH.list.length ? PH.consent : false, consentText: (consentNeeded() && PH.consent) ? consentText() : '', hpPhoto: HP.permission ? { permission: HP.permission, url: HP.url.trim(), note: HP.note.trim(), confirmed: HP.permission === 'yes' && PH.consent } : null }),
       redirect: 'follow',
       signal: ctrl ? ctrl.signal : undefined
     })
