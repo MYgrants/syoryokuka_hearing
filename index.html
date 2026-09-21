@@ -1216,13 +1216,12 @@ var FORM_DEF = {
     ['ownsite', '自社ホームページに掲載している写真'],
     ['other', 'その他のサイトの写真']
   ];
-  var CONSENT_TEXT = '添付した写真について、著作権・肖像権などの権利上、事業計画書に使用して問題がないこと（自社で撮影・作成したもの、または掲載の許諾を得ているもの）、および、人の顔が分かる写真を含まないことを確認しました。';
+  var CONSENT_BODY = '著作権・肖像権などの権利上、事業計画書に使用して問題がないこと（自社で撮影・作成したもの、または使用・掲載の許諾を得ているもの）、および、人の顔が分かる写真を含まないことを確認しました。';
   var HP_OPTIONS = [['yes', '使用してよい'], ['confirm', '使用する前に、写真ごとに確認してほしい'], ['no', '使用しない']];
-  var HP_CONSENT_TEXT = 'ホームページの写真について、著作権・肖像権などの権利上、事業計画書に使用して問題がないこと（自社で撮影・作成したもの、または使用の許諾を得ているもの）を確認しました。なお、人の顔が分かる写真は使用しません。';
-  var HP = { permission: '', url: '', note: '', confirmed: false };
-  var elHpDetail, elHpConfirmWrap, elHpConfirm, elHpUrl, elHpNote, elHpRadios = [];
+  var HP = { permission: '', url: '', note: '' };
+  var elHpDetail, elHpUrl, elHpNote, elHpRadios = [];
   var PH = { list: [], consent: false, msg: '' };
-  var elPhotoList, elPhotoAdd, elPhotoMsg, elConsentWrap, elConsent, elFile;
+  var elPhotoList, elPhotoAdd, elPhotoMsg, elConsentRow, elConsentWrap, elConsent, elConsentText, elFile;
 
   /* ---------- 小さな道具 ---------- */
   function h(tag, attrs) {
@@ -1349,6 +1348,7 @@ var FORM_DEF = {
     app.appendChild(h('h2', { class: 'sec', text: '写真について（任意）' }));
     app.appendChild(renderHp());
     app.appendChild(renderPhotos());
+    app.appendChild(renderConsent());
 
     // 送信
     elMsg = h('div', { class: 'msg', role: 'alert' });
@@ -1463,7 +1463,7 @@ var FORM_DEF = {
     elHpRadios = [];
     HP_OPTIONS.forEach(function (o) {
       var inp = h('input', { type: 'radio', name: 'hp_permission', value: o[0], id: 'hp_perm_' + o[0] });
-      inp.addEventListener('change', function () { HP.permission = o[0]; refreshHp(); markDirty(); });
+      inp.addEventListener('change', function () { HP.permission = o[0]; refreshHp(); refreshConsent(); markDirty(); });
       elHpRadios.push(inp);
       opts.appendChild(h('label', { class: 'optcard', for: 'hp_perm_' + o[0] }, inp, h('span', { text: o[1] })));
     });
@@ -1471,13 +1471,9 @@ var FORM_DEF = {
     elHpUrl.addEventListener('input', function () { HP.url = elHpUrl.value; markDirty(); });
     elHpNote = h('textarea', { class: 'short', id: 'hp_note', placeholder: '例）会社概要のページの写真を使ってほしい／社員が写っている写真は使わないでほしい' });
     elHpNote.addEventListener('input', function () { HP.note = elHpNote.value; autosize(elHpNote); markDirty(); });
-    elHpConfirm = h('input', { type: 'checkbox', id: 'hp_confirm' });
-    elHpConfirm.addEventListener('change', function () { HP.confirmed = elHpConfirm.checked; markDirty(); });
-    elHpConfirmWrap = h('label', { class: 'consent', for: 'hp_confirm' }, elHpConfirm, h('span', { text: HP_CONSENT_TEXT }));
     elHpDetail = h('div', { class: 'hpdetail' },
       h('div', { class: 'pf' }, h('label', {}, 'ホームページのURL', h('span', { class: 'opt2', text: '任意' })), elHpUrl),
-      h('div', { class: 'pf' }, h('label', {}, '補足', h('span', { class: 'opt2', text: '任意・使ってほしい写真、使ってほしくない写真など' })), elHpNote),
-      elHpConfirmWrap);
+      h('div', { class: 'pf' }, h('label', {}, '補足', h('span', { class: 'opt2', text: '任意・使ってほしい写真、使ってほしくない写真など' })), elHpNote));
     refreshHp();
     var sub = 'ホームページに掲載されている写真から、事業内容が分かるものを選んで、事業計画書に使用する場合があります。\n人の顔が分かる写真は使用しません。';
     return row(labelBlock('', '御社のホームページに掲載している写真を、事業計画書に使用してもよいですか。', sub, false), h('div', {}, opts, elHpDetail), true);
@@ -1489,13 +1485,13 @@ var FORM_DEF = {
     });
     var show = HP.permission === 'yes' || HP.permission === 'confirm';
     elHpDetail.style.display = show ? '' : 'none';
-    elHpConfirmWrap.style.display = HP.permission === 'yes' ? '' : 'none';
-    elHpUrl.value = HP.url; elHpNote.value = HP.note; elHpConfirm.checked = !!HP.confirmed;
+    elHpUrl.value = HP.url; elHpNote.value = HP.note;
     if (show) autosize(elHpNote);
   }
   function clearHp() {
-    HP = { permission: '', url: '', note: '', confirmed: false };
+    HP = { permission: '', url: '', note: '' };
     if (elHpDetail) refreshHp();
+    if (elConsentRow) refreshConsent();
   }
 
   /* ---------- 写真の添付 ---------- */
@@ -1548,10 +1544,7 @@ var FORM_DEF = {
     elPhotoList = h('div', { class: 'photolist' });
     elPhotoMsg = h('div', { class: 'photomsg', role: 'status' });
     elPhotoAdd = h('button', { class: 'btn addph', type: 'button', onclick: function () { elFile.click(); } });
-    elConsent = h('input', { type: 'checkbox', id: 'f_photo_consent' });
-    elConsent.addEventListener('change', function () { PH.consent = elConsent.checked; });
-    elConsentWrap = h('label', { class: 'consent', for: 'f_photo_consent' }, elConsent, h('span', { text: CONSENT_TEXT }));
-    var box = h('div', {}, elPhotoAdd, elFile, elPhotoMsg, elPhotoList, elConsentWrap,
+    var box = h('div', {}, elPhotoAdd, elFile, elPhotoMsg, elPhotoList,
       h('div', { class: 'hint', text: '※ 写真は自動保存されません。送信前にこのページを閉じると、写真の選び直しが必要です。' }));
     var sub = [
       '最大' + MAX_PHOTOS + '枚まで添付できます。写真は、自動的に、印刷に十分な大きさに整えて送られます。',
@@ -1563,14 +1556,38 @@ var FORM_DEF = {
     return row(labelBlock('', '事業計画書に載せてもよい写真があれば、添付してください。', sub, false), box, true);
   }
 
+  /* 写真の権利などの確認（ホームページの写真と、添付した写真で、共通の1つのチェック） */
+  function consentNeeded() { return HP.permission === 'yes' || PH.list.length > 0; }
+  function consentText() {
+    var hp = HP.permission === 'yes', ph = PH.list.length > 0;
+    return (hp && ph ? '添付した写真とホームページの写真' : hp ? 'ホームページの写真' : '添付した写真') + 'について、' + CONSENT_BODY;
+  }
+  function renderConsent() {
+    elConsent = h('input', { type: 'checkbox', id: 'f_photo_consent' });
+    elConsent.addEventListener('change', function () { PH.consent = elConsent.checked; markDirty(); });
+    elConsentText = h('span', {});
+    elConsentWrap = h('label', { class: 'consent', for: 'f_photo_consent' }, elConsent, elConsentText);
+    elConsentRow = row(labelBlock('', '写真の権利などの確認', '', false), elConsentWrap, true);
+    refreshConsent();
+    return elConsentRow;
+  }
+  function refreshConsent() {
+    if (!elConsentRow) return;
+    var need = consentNeeded();
+    if (!need) PH.consent = false;
+    elConsentRow.style.display = need ? '' : 'none';
+    elConsent.checked = !!PH.consent;
+    elConsentText.textContent = consentText();
+  }
+
   function refreshPhotos() {
     elPhotoList.innerHTML = '';
     PH.list.forEach(function (p, i) { elPhotoList.appendChild(photoCard(p, i)); });
     var left = MAX_PHOTOS - PH.list.length;
     elPhotoAdd.textContent = left > 0 ? '＋ 写真を追加する（あと' + left + '枚）' : '写真は最大' + MAX_PHOTOS + '枚までです';
     elPhotoAdd.disabled = left <= 0;
-    elConsentWrap.style.display = PH.list.length ? '' : 'none';
     elPhotoMsg.textContent = PH.msg;
+    refreshConsent();
   }
 
   function photoCard(p, i) {
@@ -1608,7 +1625,6 @@ var FORM_DEF = {
     if (i >= 0) PH.list.splice(i, 1);
     if (p.thumb) { try { URL.revokeObjectURL(p.thumb); } catch (e) {} }
     PH.msg = '';
-    if (!PH.list.length) { PH.consent = false; if (elConsent) elConsent.checked = false; }
     refreshPhotos();
   }
 
@@ -1636,20 +1652,16 @@ var FORM_DEF = {
   function clearPhotos() {
     PH.list.forEach(function (p) { if (p.thumb) { try { URL.revokeObjectURL(p.thumb); } catch (e) {} } });
     PH.list = []; PH.consent = false; PH.msg = '';
-    if (elConsent) elConsent.checked = false;
     if (elPhotoList) refreshPhotos();
   }
 
   /* 送信前の写真のチェック。問題があれば、お客様向けの文を返す */
   function checkPhotos() {
-    if (HP.permission === 'yes' && !HP.confirmed) return 'ホームページの写真を使用する場合は、権利の確認（チェック欄）にチェックをお願いします。';
-    if (!PH.list.length) return '';
     if (PH.list.some(function (p) { return p.status !== 'ready'; })) return '写真の読み込みが終わるまで、少しお待ちください。';
     for (var i = 0; i < PH.list.length; i++) {
-      var p = PH.list[i];
-      if (!p.source) return '写真' + (i + 1) + 'の掲載元を選択してください。';
+      if (!PH.list[i].source) return '写真' + (i + 1) + 'の掲載元を選択してください。';
     }
-    if (!PH.consent) return '写真の権利などの確認（チェック欄）にチェックをお願いします。';
+    if (consentNeeded() && !PH.consent) return '写真の権利などの確認（チェック欄）にチェックをお願いします。';
     var total = PH.list.reduce(function (a, p) { return a + p.b64.length; }, 0);
     if (total > MAX_TOTAL_B64) return '写真の合計サイズが大きすぎます。枚数を減らして、もう一度お試しください。';
     return '';
@@ -1685,7 +1697,7 @@ var FORM_DEF = {
   function saveNow() {
     if (!S.dirty || !S.storage) return;
     S.dirty = false;
-    var ok = lsSet(KEY, JSON.stringify({ t: Date.now(), a: collect(), hp: HP }));
+    var ok = lsSet(KEY, JSON.stringify({ t: Date.now(), a: collect(), hp: HP, consent: PH.consent }));
     setStatus(ok ? '自動保存しました（' + hhmm(Date.now()) + '）' : '自動保存できませんでした。');
   }
   setInterval(saveNow, 15000);
@@ -1702,7 +1714,7 @@ var FORM_DEF = {
       var hasHp = d.hp && d.hp.permission;
       if (!ids.length && !hasHp) return;
       ids.forEach(function (id) { setField(id, d.a[id]); });
-      if (hasHp) { HP = { permission: d.hp.permission, url: d.hp.url || '', note: d.hp.note || '', confirmed: !!d.hp.confirmed }; refreshHp(); }
+      if (hasHp) { HP = { permission: d.hp.permission, url: d.hp.url || '', note: d.hp.note || '' }; PH.consent = !!d.consent && HP.permission === 'yes'; refreshHp(); refreshConsent(); }
       updateCount();
       elNotice.appendChild(h('div', { class: 'notice', text: hhmm(d.t) + ' に保存した入力内容を復元しました。続きからご記入ください。' }));
     } catch (e) { lsDel(KEY); }
@@ -1760,7 +1772,7 @@ var FORM_DEF = {
     var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, hasPhotos ? 240000 : 90000) : null;
     fetch(CONFIG.ENDPOINT, {
       method: 'POST',
-      body: JSON.stringify({ rid: RID, answers: a, hp: elHp ? elHp.value : '', photos: photosPayload(), photoConsent: PH.list.length ? PH.consent : false, hpPhoto: HP.permission ? { permission: HP.permission, url: HP.url.trim(), note: HP.note.trim(), confirmed: HP.confirmed } : null }),
+      body: JSON.stringify({ rid: RID, answers: a, hp: elHp ? elHp.value : '', photos: photosPayload(), photoConsent: PH.list.length ? PH.consent : false, hpPhoto: HP.permission ? { permission: HP.permission, url: HP.url.trim(), note: HP.note.trim(), confirmed: HP.permission === 'yes' && PH.consent } : null }),
       redirect: 'follow',
       signal: ctrl ? ctrl.signal : undefined
     })
