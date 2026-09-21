@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>ヒアリング</title>
+<style>
+  /* 配色はここだけで変更できます */
+  :root {
+    --ink: #0f172a;        /* 文字 */
+    --sub: #64748b;        /* 補足の文字 */
+    --line: #e2e8f0;       /* 区切り線 */
+    --line-strong: #cbd5e1;
+    --field: #f1f5f9;      /* 入力欄の背景 */
+    --field-line: #d5dde8; /* 入力欄の枠 */
+    --ph: #94a3b8;         /* 入力欄の中の薄い文字 */
+    --head: #e2e8f0;       /* 表の見出し */
+    --accent: #3b5b92;     /* アクセント（必須マーク・見出しの線・送信ボタン） */
+    --accent-dark: #2f4a78;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: #fff; color: var(--ink); font-size: 15px; line-height: 1.75; letter-spacing: .02em;
+    font-family: "Yu Gothic UI", "Yu Gothic", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px 120px; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  /* 上部バー */
+  .bar {
+    position: sticky; top: 0; z-index: 5; background: #fff; border-bottom: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: 6px 20px; align-items: center; justify-content: space-between;
+    padding: 10px 0; font-size: 13px; color: var(--sub);
+  }
+  .bar .left { display: flex; gap: 6px 20px; flex-wrap: wrap; }
+  .bar .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  /* タイトル */
+  .hero { text-align: center; padding: 56px 0 20px; }
+  .hero h1 { font-size: 30px; line-height: 1.4; margin: 0; color: var(--accent); letter-spacing: .08em; }
+  .hero .rule { display: block; width: 56px; height: 3px; background: var(--accent); margin: 18px auto 28px; }
+  .hero p { margin: 0 0 4px; font-size: 14px; }
+  .hero .req-note { color: var(--accent); }
+  .hero .lead { color: var(--sub); }
+  .notice { background: var(--field); padding: 12px 16px; margin: 8px 0 0; font-size: 14px; }
+
+  /* 大見出し */
+  h2.sec { font-size: 19px; line-height: 1.4; margin: 64px 0 0; padding-bottom: 12px; border-bottom: 2px solid var(--accent); color: var(--ink); }
+
+  /* 1つの質問 = 1行（左：質問、右：入力欄） */
+  .row {
+    display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 12px 48px;
+    padding: 32px 8px; border-bottom: 1px solid var(--line); align-items: start;
+  }
+  .row:focus-within { background: #f8fafc; }
+  .row.wide { grid-template-columns: minmax(0, 1fr); }
+  .lab { font-weight: 700; line-height: 1.7; }
+  .lab .line { position: relative; padding-left: 28px; }
+  .lab .no { position: absolute; left: 0; top: 0; color: var(--sub); font-weight: 400; font-size: 13px; }
+  .lab .req { color: var(--accent); margin-left: 4px; }
+  .lab .sub { font-weight: 400; font-size: 13px; color: var(--sub); margin: 6px 0 0 28px; line-height: 1.7; white-space: pre-line; }
+  .fld .hint { font-size: 13px; color: var(--sub); margin-top: 8px; }
+  .withunit { display: flex; align-items: center; gap: 10px; }
+  .unit { color: var(--sub); white-space: nowrap; }
+
+  /* 入力欄 */
+  textarea, input[type=text], select {
+    width: 100%; font: inherit; letter-spacing: inherit; color: var(--ink); background: var(--field);
+    border: 1px solid var(--field-line); border-radius: 2px; padding: 14px 16px;
+  }
+  textarea { min-height: 112px; resize: vertical; line-height: 1.7; }
+  textarea.short { min-height: 54px; resize: none; }
+  input[type=text], select { height: 54px; }
+  ::placeholder { color: var(--ph); opacity: 1; }
+  textarea:focus, input[type=text]:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; background: #fff; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* プルダウン（矢印を、右端ではなく少し内側に置く） */
+  select {
+    -webkit-appearance: none; appearance: none; cursor: pointer; padding-right: 52px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1.5l6 6 6-6' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 20px center; background-size: 14px 9px;
+  }
+  select:invalid, select.empty { color: var(--ph); }
+
+  /* ボタン */
+  .btn {
+    font: inherit; font-size: 13px; color: var(--ink); background: #fff; border: 1px solid var(--line-strong);
+    border-radius: 2px; padding: 5px 14px; cursor: pointer;
+  }
+  .btn:hover { background: var(--field); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-size: 16px; font-weight: 700; padding: 16px 64px; letter-spacing: .1em; }
+  .btn.primary:hover { background: var(--accent-dark); }
+  .btn:disabled { opacity: .5; cursor: default; }
+
+  /* 表：見出しの下に、1つずつ独立した入力欄を並べる */
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: 14px; }
+  th, td { border: 1px solid var(--line-strong); vertical-align: middle; text-align: left; }
+  th { background: var(--head); font-size: 13px; padding: 10px 12px; vertical-align: top; }
+  th .hsub { display: block; font-weight: 400; font-size: 12px; color: var(--sub); line-height: 1.5; margin-top: 2px; }
+  td { padding: 8px; }
+  td.rowno { text-align: center; font-weight: 700; padding: 8px 4px; }
+  td.rowlab { font-weight: 700; padding: 8px 12px; }
+  th.num { text-align: center; }
+  td input[type=text], td textarea, td select { padding: 12px; min-height: 50px; }
+  td input[type=text], td select { height: 50px; }
+  td textarea { height: 50px; resize: none; overflow: hidden; display: block; }
+  td.selcell select { max-width: 280px; }
+  td .withunit input { text-align: center; }
+  td select { padding-right: 48px; }
+
+  /* 記入例の行：入力欄と見た目を変える（枠なし・白地・薄い文字） */
+  tr.exrow td { background: #fff; color: var(--sub); padding: 12px; border-style: dashed; vertical-align: top; }
+  tr.exrow td.rowno { padding: 10px 4px; }
+  .chip { display: inline-block; font-size: 11px; font-weight: 700; color: var(--sub); background: var(--head); border-radius: 2px; padding: 1px 6px; letter-spacing: 0; white-space: nowrap; }
+  .steps { display: block; margin-top: 6px; }
+
+  .submit { margin-top: 56px; text-align: center; }
+  .msg { margin-top: 16px; font-weight: 700; color: var(--accent-dark); min-height: 1.5em; }
+  .submit .lead { color: var(--sub); font-size: 13px; margin-top: 12px; }
+  .done { margin: 100px 0; text-align: center; }
+  .done h1 { font-size: 26px; color: var(--accent); margin: 0 0 12px; }
+
+  @media (max-width: 760px) {
+    .wrap { padding: 0 16px 100px; }
+    .hero { padding-top: 40px; }
+    .hero h1 { font-size: 21px; letter-spacing: .03em; }
+    .hero p { text-align: left; }
+    .hero .rule { margin: 14px auto 22px; }
+    .bar { position: static; font-size: 12px; gap: 4px 12px; padding: 10px 0; }
+    .bar .left { gap: 2px 12px; }
+    .bar .btn { font-size: 12px; padding: 4px 10px; }
+    .row { grid-template-columns: minmax(0, 1fr); padding: 24px 0; }
+    textarea, input[type=text], select { font-size: 16px; }
+    table, thead, tbody, tr, th, td { display: block; }
+    thead { display: none; }
+    tr { border: 1px solid var(--line-strong); margin-bottom: 14px; padding: 4px 0; }
+    td, tr.exrow td { border: 0; padding: 6px 12px; }
+    td.rowno { text-align: left; padding: 8px 12px 0; }
+    td.rowlab { padding: 8px 12px 0; }
+    td[data-label]::before { content: attr(data-label); display: block; font-size: 12px; color: var(--sub); font-weight: 400; padding: 0 0 4px; }
+    td.rowlab::before, td.rowno::before { display: none; }
+    td:empty { display: none; }
+    td.selcell select { max-width: none; }
+    .btn.primary { width: 100%; padding: 16px 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><p class="hero">読み込み中です…</p></div>
+
+<script>
+/* ================= 管理者用の設定（ここだけ編集してください） ================= */
+var CONFIG = {
+  // Apps ScriptのウェブアプリのURL（「…/exec」で終わるもの）を、引用符の中に貼り付けてください
+  ENDPOINT: 'https://script.google.com/macros/s/AKfycbw-71vuTfH00vxrf-exbkHseE2xnx0sDeWXhUQddMbBhxbJFZtMOnq73arJApS5yTXz/exec',
+  // 入力途中の内容を、お客様の端末に保持する時間（時間）
+  DRAFT_HOURS: 24
+};
+/* ============================================================================= */
+
+var FORM_DEF = {
+ "meta": {
+  "title": "事業計画作成用 ヒアリングシート",
+  "note": "数字は概算で構いません。分からない項目は空欄でも結構です。記入例は書き方の参考です。内容はご自身の状況に合わせてご記入ください。",
+  "version": "2026-09-21"
+ },
+ "basic": [
+  {
+   "id": "company",
+   "label": "会社名（正式名称）",
+   "cell": "C4",
+   "required": true
+  },
+  {
+   "id": "contact",
+   "label": "ご担当者名",
+   "cell": "C5",
+   "required": true
+  }
+ ],
+ "items": [
+  {
+   "id": "q1",
+   "type": "prose",
+   "no": 1,
+   "category": "事業・会社概要",
+   "question": "現在の主な事業内容をお聞かせください。（提供しているサービスと、主なお客様）",
+   "example": "例）法人向けに業務用の資材を仕入れて販売しています。主なお客様は地域の建設会社・工務店（約80社）で、受注から配送まで自社で行っています。",
+   "cell": "D9",
+   "short": false
+  },
+  {
+   "id": "q2",
+   "type": "prose",
+   "no": 2,
+   "category": "事業・会社概要",
+   "question": "創業の経緯や、事業運営で大切にされている考え方をお聞かせください。",
+   "example": "例）20XX年に、前職での経験を活かして創業しました。「納期を守る」「小口の注文にも対応する」ことを大切にしています。",
+   "cell": "D10",
+   "short": false
+  },
+  {
+   "id": "q3",
+   "type": "prose",
+   "no": 3,
+   "category": "事業・会社概要",
+   "question": "会社の規模をお聞かせください。（従業員数、拠点の有無など）",
+   "example": "例）従業員15名（正社員10名、パート5名）。本社と倉庫の2拠点です。",
+   "cell": "D11",
+   "short": false
+  },
+  {
+   "id": "q4",
+   "type": "prose",
+   "no": 4,
+   "category": "事業・会社概要",
+   "question": "5年後、10年後に目指されている姿をお聞かせください。",
+   "example": "例）地域で最も頼りにされる資材の供給元になりたいと考えています。商圏を広げつつ、従業員が無理なく働ける体制を整えたいです。",
+   "cell": "D12",
+   "short": false
+  },
+  {
+   "id": "q5",
+   "type": "table",
+   "no": 5,
+   "category": "取引・サービス",
+   "question": "主要な取引先（上位3社）について、下の表にご記入ください。",
+   "headers": [
+    "順位",
+    "売上比率（%）",
+    "企業名",
+    "取引内容",
+    "最近の傾向（増減とその理由）"
+   ],
+   "cols": [
+    {
+     "multiline": false,
+     "numeric": false,
+     "w": 4
+    },
+    {
+     "multiline": false,
+     "numeric": true,
+     "w": 9
+    },
+    {
+     "multiline": false,
+     "numeric": false,
+     "w": 26
+    },
+    {
+     "multiline": true,
+     "numeric": false,
+     "w": 29
+    },
+    {
+     "multiline": true,
+     "numeric": false,
+     "w": 31
+    }
+   ],
+   "examples": [
+    [
+     "例",
+     30,
+     "株式会社○○",
+     "月20件の定期受注",
+     "増加傾向（新規案件が増えている）"
+    ]
+   ],
+   "rows": [
+    [
+     {
+      "t": "label",
+      "text": "1"
+     },
+     {
+      "t": "input",
+      "id": "q5_1_2",
+      "cell": "B17"
+     },
+     {
+      "t": "input",
+      "id": "q5_1_3",
+      "cell": "C17"
+     },
+     {
+      "t": "input",
+      "id": "q5_1_4",
+      "cell": "D17"
+     },
+     {
+      "t": "input",
+      "id": "q5_1_5",
+      "cell": "E17"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": "2"
+     },
+     {
+      "t": "input",
+      "id": "q5_2_2",
+      "cell": "B18"
+     },
+     {
+      "t": "input",
+      "id": "q5_2_3",
+      "cell": "C18"
+     },
+     {
+      "t": "input",
+      "id": "q5_2_4",
+      "cell": "D18"
+     },
+     {
+      "t": "input",
+      "id": "q5_2_5",
+      "cell": "E18"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": "3"
+     },
+     {
+      "t": "input",
+      "id": "q5_3_2",
+      "cell": "B19"
+     },
+     {
+      "t": "input",
+      "id": "q5_3_3",
+      "cell": "C19"
+     },
+     {
+      "t": "input",
+      "id": "q5_3_4",
+      "cell": "D19"
+     },
+     {
+      "t": "input",
+      "id": "q5_3_5",
+      "cell": "E19"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "q6",
+   "type": "table",
+   "no": 6,
+   "category": "取引・サービス",
+   "question": "主力のサービス・製品（上位3つ）について、下の表にご記入ください。",
+   "headers": [
+    "順位",
+    "売上比率（%）",
+    "サービス・製品名",
+    "内容・特徴（利益が出やすい・出にくい、など）",
+    "最近の傾向（増減とその理由）"
+   ],
+   "cols": [
+    {
+     "multiline": false,
+     "numeric": false,
+     "w": 4
+    },
+    {
+     "multiline": false,
+     "numeric": true,
+     "w": 9
+    },
+    {
+     "multiline": false,
+     "numeric": false,
+     "w": 26
+    },
+    {
+     "multiline": true,
+     "numeric": false,
+     "w": 29
+    },
+    {
+     "multiline": true,
+     "numeric": false,
+     "w": 31
+    }
+   ],
+   "examples": [
+    [
+     "例",
+     70,
+     "資材の販売",
+     "建設会社向けの資材の販売と配送。利益は安定している",
+     "横ばい"
+    ]
+   ],
+   "rows": [
+    [
+     {
+      "t": "label",
+      "text": "1"
+     },
+     {
+      "t": "input",
+      "id": "q6_1_2",
+      "cell": "B24"
+     },
+     {
+      "t": "input",
+      "id": "q6_1_3",
+      "cell": "C24"
+     },
+     {
+      "t": "input",
+      "id": "q6_1_4",
+      "cell": "D24"
+     },
+     {
+      "t": "input",
+      "id": "q6_1_5",
+      "cell": "E24"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": "2"
+     },
+     {
+      "t": "input",
+      "id": "q6_2_2",
+      "cell": "B25"
+     },
+     {
+      "t": "input",
+      "id": "q6_2_3",
+      "cell": "C25"
+     },
+     {
+      "t": "input",
+      "id": "q6_2_4",
+      "cell": "D25"
+     },
+     {
+      "t": "input",
+      "id": "q6_2_5",
+      "cell": "E25"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": "3"
+     },
+     {
+      "t": "input",
+      "id": "q6_3_2",
+      "cell": "B26"
+     },
+     {
+      "t": "input",
+      "id": "q6_3_3",
+      "cell": "C26"
+     },
+     {
+      "t": "input",
+      "id": "q6_3_4",
+      "cell": "D26"
+     },
+     {
+      "t": "input",
+      "id": "q6_3_5",
+      "cell": "E26"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "q7",
+   "type": "prose",
+   "no": 7,
+   "category": "取引・サービス",
+   "question": "顧客構成をお聞かせください。（法人・個人の別、お客様の数、新規とリピートの比率、特定のお客様への売上の偏りなど）",
+   "example": "例）法人9割・個人1割。お客様数は約120社。新規3割・リピート7割。上位3社で売上の約50%を占めています。",
+   "cell": "D29",
+   "short": false
+  },
+  {
+   "id": "q8",
+   "type": "prose",
+   "no": 8,
+   "category": "強み・競合",
+   "question": "自社の強みと弱みをお聞かせください。",
+   "example": "例）強み：即日配送に対応できる点、担当者が現場の事情に詳しい点。\n弱み：受注や在庫の管理が担当者ごとに異なり、繁忙期に対応が遅れやすい点。",
+   "cell": "D30",
+   "short": false
+  },
+  {
+   "id": "q9",
+   "type": "prose",
+   "no": 9,
+   "category": "強み・競合",
+   "question": "主な競合と、競合との差別化のポイントをお聞かせください。",
+   "example": "例）近隣の同業2社（A社、B社）が競合です。A社は価格が安い一方、当社は小口注文・即日対応で差別化しています。",
+   "cell": "D31",
+   "short": false
+  },
+  {
+   "id": "q10",
+   "type": "prose",
+   "no": 10,
+   "category": "現状の業務",
+   "question": "業務の流れの中で、特に手間や時間がかかっている作業をお聞かせください。",
+   "example": "例）電話・FAXで受けた注文を、毎回手作業で台帳に転記する作業に時間がかかっています。1日あたり約2時間です。",
+   "cell": "D32",
+   "short": false
+  },
+  {
+   "id": "q11",
+   "type": "prose",
+   "no": 11,
+   "category": "現状の業務",
+   "question": "紙・Excel・口頭などで管理されている業務や、特定の担当者に依存している業務があればお聞かせください。",
+   "example": "例）在庫の管理はExcelで行っており、更新方法を把握しているのはベテラン担当者1名のみです。",
+   "cell": "D33",
+   "short": false
+  },
+  {
+   "id": "q12",
+   "type": "prose",
+   "no": 12,
+   "category": "現状の業務",
+   "question": "ミスや漏れが起きやすい作業があればお聞かせください。",
+   "example": "例）注文内容の転記ミスにより、月に2〜3件、誤出荷や納品遅れが発生しています。",
+   "cell": "D34",
+   "short": false
+  },
+  {
+   "id": "q13",
+   "type": "prose",
+   "no": 13,
+   "category": "現状の業務",
+   "question": "人手不足の状況をお聞かせください。（欠員、退職、採用状況、残業時間など）",
+   "example": "例）事務担当が1名退職し、半年間補充できていません。事務担当の月平均残業は約30時間です。",
+   "cell": "D35",
+   "short": false
+  },
+  {
+   "id": "q14",
+   "type": "prose",
+   "no": 14,
+   "category": "今後の見通し",
+   "question": "今後、需要の拡大が見込まれる市場やお客様の動きがあればお聞かせください。",
+   "example": "例）近隣で新築・リフォームの案件が増えており、資材の問い合わせが前年より増えています。",
+   "cell": "D36",
+   "short": false
+  },
+  {
+   "id": "q15",
+   "type": "prose",
+   "no": 15,
+   "category": "今後の見通し",
+   "question": "現在のやり方を続けた場合に、限界や不安を感じる点をお聞かせください。",
+   "example": "例）注文が増えても現在の人数では対応しきれず、お断りする場面が出ています。担当者が退職すると業務が回らなくなる不安があります。",
+   "cell": "D37",
+   "short": false
+  },
+  {
+   "id": "q16",
+   "type": "prose",
+   "no": 16,
+   "category": "今後の見通し",
+   "question": "競合、人材確保、コスト上昇など、今後の経営に影響が出そうな外部要因をお聞かせください。",
+   "example": "例）競合の値下げ、事務担当の採用難、仕入価格と物流費の上昇が影響しそうです。",
+   "cell": "D38",
+   "short": false
+  },
+  {
+   "id": "q17",
+   "type": "prose",
+   "no": 17,
+   "category": "業務効率化で生まれる時間の使い道",
+   "question": "システム導入により削減できた時間を、誰が、どの業務に充てたいとお考えですか。",
+   "example": "例）事務担当2名が、月40時間ずつ新規のお客様への提案・フォロー営業に充てたいです。",
+   "cell": "D39",
+   "short": false
+  },
+  {
+   "id": "q18",
+   "type": "prose",
+   "no": 18,
+   "category": "業務効率化で生まれる時間の使い道",
+   "question": "その業務に時間を充てることで、売上や利益がどのように伸びる見込みですか。根拠もお聞かせください。",
+   "example": "例）現在、対応しきれず月5件ほどお断りしている案件があり、1件あたり平均30万円です。受けられれば、年間約1,800万円の売上増を見込んでいます。",
+   "cell": "D40",
+   "short": false
+  },
+  {
+   "id": "q19",
+   "type": "prose",
+   "no": 19,
+   "category": "業務効率化で生まれる時間の使い道",
+   "question": "新規顧客の開拓、新サービス、価格の見直しなどで、取り組みたいことがあればお聞かせください。",
+   "example": "例）近隣エリアの工務店への新規営業を強化したいです。あわせて、小口配送の料金体系を見直したいです。",
+   "cell": "D41",
+   "short": false
+  },
+  {
+   "id": "q20",
+   "type": "prose",
+   "no": 20,
+   "category": "業務効率化で生まれる時間の使い道",
+   "question": "従業員のスキル向上のために、予定または希望されていることがあればお聞かせください。（研修、資格取得など）",
+   "example": "例）営業担当向けの提案力研修、事務担当向けのシステム操作研修を予定しています。",
+   "cell": "D42",
+   "short": false
+  },
+  {
+   "id": "q21",
+   "type": "prose",
+   "no": 21,
+   "category": "業務効率化で生まれる時間の使い道",
+   "question": "システム導入により削減できそうなコストがあればお聞かせください。（外注費、残業代、ミスによる損失など）",
+   "example": "例）残業代が月約10万円、誤出荷による再配送費が月約3万円あり、これらの削減を見込んでいます。\n※概算で結構です",
+   "cell": "D43",
+   "short": false
+  },
+  {
+   "id": "q22",
+   "type": "table",
+   "no": 22,
+   "category": "売上・人員・数字",
+   "question": "今期の売上と利益の見込み、来期以降に直近の決算と比べてどの程度伸ばしたいかを、下の表にご記入ください。（金額が難しい場合は、「増加・横ばい・減少」の見通しのみでも結構です）",
+   "headers": [
+    "",
+    "項目",
+    "今期の見込み",
+    "来期以降に伸ばしたい目安（直近の決算と比べて）"
+   ],
+   "cols": [
+    {
+     "multiline": false,
+     "numeric": false,
+     "w": 5
+    },
+    {
+     "multiline": false,
+     "numeric": false,
+     "w": 14
+    },
+    {
+     "multiline": true,
+     "numeric": false,
+     "w": 38
+    },
+    {
+     "multiline": true,
+     "numeric": false,
+     "w": 43
+    }
+   ],
+   "examples": [
+    [
+     "例",
+     "売上",
+     "約3億円（前期比+2%の見込み）",
+     "毎年5%ずつ増やしたい"
+    ],
+    [
+     "例",
+     "利益",
+     "前期と同程度の見込み",
+     "3年後に、現在の1.3倍にしたい"
+    ]
+   ],
+   "rows": [
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "label",
+      "text": "売上"
+     },
+     {
+      "t": "input",
+      "id": "q22_1_3",
+      "cell": "C49"
+     },
+     {
+      "t": "input",
+      "id": "q22_1_4",
+      "cell": "D49"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "label",
+      "text": "利益"
+     },
+     {
+      "t": "input",
+      "id": "q22_2_3",
+      "cell": "C50"
+     },
+     {
+      "t": "input",
+      "id": "q22_2_4",
+      "cell": "D50"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "q23",
+   "type": "prose",
+   "no": 23,
+   "category": "売上・人員・数字",
+   "question": "現時点で決まっている、今後の採用・退職・休職の予定をお聞かせください。",
+   "example": "例）来期に事務担当を1名採用予定です。2年以内に定年退職予定の方が2名、来年春から1年間、育児休業を取得予定の方が1名います。\n※決まっている範囲で結構です",
+   "cell": "D53",
+   "short": false
+  },
+  {
+   "id": "q24",
+   "type": "prose",
+   "no": 24,
+   "category": "売上・人員・数字",
+   "question": "会社全体の年間稼働日数をお聞かせください。（日）",
+   "example": "例）約250日（土日祝日は休み）\n※おおよその日数で結構です",
+   "cell": "D54",
+   "short": true
+  },
+  {
+   "id": "q25",
+   "type": "prose",
+   "no": 25,
+   "category": "売上・人員・数字",
+   "question": "従業員・役員の時給の平均額をお聞かせください。（円/時）",
+   "example": "例）約2,000円/時（月給32万円 ÷ 月の勤務時間160時間）\n※概算で結構です",
+   "cell": "D55",
+   "short": true
+  },
+  {
+   "id": "q26",
+   "type": "table",
+   "no": 26,
+   "category": "情報管理",
+   "question": "現在実施されている情報管理の対策について、下の表にご記入ください。（未実施の項目も、そのままご記入ください）",
+   "headers": [
+    "",
+    "対策",
+    "実施状況",
+    "具体的な内容"
+   ],
+   "cols": [
+    {
+     "multiline": false,
+     "numeric": false,
+     "w": 5
+    },
+    {
+     "multiline": false,
+     "numeric": false,
+     "w": 14
+    },
+    {
+     "multiline": true,
+     "numeric": false,
+     "w": 38
+    },
+    {
+     "multiline": true,
+     "numeric": false,
+     "w": 43
+    }
+   ],
+   "examples": [
+    [
+     "例",
+     "ウイルス対策ソフト",
+     "実施している",
+     "全パソコンに導入済み。自動で更新される設定にしている"
+    ]
+   ],
+   "rows": [
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "label",
+      "text": "ウイルス対策ソフト"
+     },
+     {
+      "t": "select",
+      "id": "q26_1_3",
+      "cell": "C60",
+      "options": [
+       "実施している",
+       "一部実施している",
+       "実施していない"
+      ]
+     },
+     {
+      "t": "input",
+      "id": "q26_1_4",
+      "cell": "D60"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "label",
+      "text": "データのバックアップ"
+     },
+     {
+      "t": "select",
+      "id": "q26_2_3",
+      "cell": "C61",
+      "options": [
+       "実施している",
+       "一部実施している",
+       "実施していない"
+      ]
+     },
+     {
+      "t": "input",
+      "id": "q26_2_4",
+      "cell": "D61"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "label",
+      "text": "パスワードの管理"
+     },
+     {
+      "t": "select",
+      "id": "q26_3_3",
+      "cell": "C62",
+      "options": [
+       "実施している",
+       "一部実施している",
+       "実施していない"
+      ]
+     },
+     {
+      "t": "input",
+      "id": "q26_3_4",
+      "cell": "D62"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "label",
+      "text": "アクセス権限の管理"
+     },
+     {
+      "t": "select",
+      "id": "q26_4_3",
+      "cell": "C63",
+      "options": [
+       "実施している",
+       "一部実施している",
+       "実施していない"
+      ]
+     },
+     {
+      "t": "input",
+      "id": "q26_4_4",
+      "cell": "D63"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "label",
+      "text": "その他"
+     },
+     {
+      "t": "select",
+      "id": "q26_5_3",
+      "cell": "C64",
+      "options": [
+       "実施している",
+       "一部実施している",
+       "実施していない"
+      ]
+     },
+     {
+      "t": "input",
+      "id": "q26_5_4",
+      "cell": "D64"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "q27",
+   "type": "table",
+   "no": 27,
+   "category": "体制",
+   "question": "システム導入に関わる社内の方について、下の表にご記入ください。",
+   "headers": [
+    "",
+    "氏名",
+    "役職・担当内容",
+    "関連する経験・経歴（システム導入や業務改善の経験など）"
+   ],
+   "cols": [
+    {
+     "multiline": false,
+     "numeric": false,
+     "w": 5
+    },
+    {
+     "multiline": false,
+     "numeric": false,
+     "w": 14
+    },
+    {
+     "multiline": true,
+     "numeric": false,
+     "w": 38
+    },
+    {
+     "multiline": true,
+     "numeric": false,
+     "w": 43
+    }
+   ],
+   "examples": [
+    [
+     "例",
+     "A",
+     "代表。導入全体の進行管理と最終判断を担当",
+     "20XX年から代表を務め、過去に業務システムを導入した経験あり"
+    ],
+    [
+     "例",
+     "B",
+     "事務責任者。現場での運用ルールの整備と従業員への説明を担当",
+     "勤続10年で、社内の業務全般に精通"
+    ]
+   ],
+   "rows": [
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "input",
+      "id": "q27_1_2",
+      "cell": "B70"
+     },
+     {
+      "t": "input",
+      "id": "q27_1_3",
+      "cell": "C70"
+     },
+     {
+      "t": "input",
+      "id": "q27_1_4",
+      "cell": "D70"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "input",
+      "id": "q27_2_2",
+      "cell": "B71"
+     },
+     {
+      "t": "input",
+      "id": "q27_2_3",
+      "cell": "C71"
+     },
+     {
+      "t": "input",
+      "id": "q27_2_4",
+      "cell": "D71"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "input",
+      "id": "q27_3_2",
+      "cell": "B72"
+     },
+     {
+      "t": "input",
+      "id": "q27_3_3",
+      "cell": "C72"
+     },
+     {
+      "t": "input",
+      "id": "q27_3_4",
+      "cell": "D72"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "input",
+      "id": "q27_4_2",
+      "cell": "B73"
+     },
+     {
+      "t": "input",
+      "id": "q27_4_3",
+      "cell": "C73"
+     },
+     {
+      "t": "input",
+      "id": "q27_4_4",
+      "cell": "D73"
+     }
+    ]
+   ]
+  },
+  {
+   "id": "q28",
+   "type": "table",
+   "no": 28,
+   "category": "体制",
+   "question": "システム導入に関わる社外の会社（システム会社、機器販売会社、工事会社など）について、下の表にご記入ください。",
+   "headers": [
+    "",
+    "会社名",
+    "役割",
+    "内容"
+   ],
+   "cols": [
+    {
+     "multiline": false,
+     "numeric": false,
+     "w": 5
+    },
+    {
+     "multiline": false,
+     "numeric": false,
+     "w": 14
+    },
+    {
+     "multiline": true,
+     "numeric": false,
+     "w": 38
+    },
+    {
+     "multiline": true,
+     "numeric": false,
+     "w": 43
+    }
+   ],
+   "examples": [
+    [
+     "例",
+     "株式会社○○",
+     "システム開発・導入支援",
+     "現場の業務フローに合わせた設計とテスト運用の支援"
+    ]
+   ],
+   "rows": [
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "input",
+      "id": "q28_1_2",
+      "cell": "B78"
+     },
+     {
+      "t": "input",
+      "id": "q28_1_3",
+      "cell": "C78"
+     },
+     {
+      "t": "input",
+      "id": "q28_1_4",
+      "cell": "D78"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "input",
+      "id": "q28_2_2",
+      "cell": "B79"
+     },
+     {
+      "t": "input",
+      "id": "q28_2_3",
+      "cell": "C79"
+     },
+     {
+      "t": "input",
+      "id": "q28_2_4",
+      "cell": "D79"
+     }
+    ],
+    [
+     {
+      "t": "label",
+      "text": ""
+     },
+     {
+      "t": "input",
+      "id": "q28_3_2",
+      "cell": "B80"
+     },
+     {
+      "t": "input",
+      "id": "q28_3_3",
+      "cell": "C80"
+     },
+     {
+      "t": "input",
+      "id": "q28_3_4",
+      "cell": "D80"
+     }
+    ]
+   ]
+  }
+ ]
+};
+
+(function () {
+  'use strict';
+  var DEF = FORM_DEF;
+  var HOURS = CONFIG.DRAFT_HOURS || 24;
+  var KEY = 'hs_draft_v1';
+  var S = { dirty: false, timer: null, storage: false, groups: [], sending: false };
+  var RID = newRid();
+
+  /* ---------- 小さな道具 ---------- */
+  function h(tag, attrs) {
+    var e = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === 'class') e.className = attrs[k];
+      else if (k === 'text') e.textContent = attrs[k];
+      else if (k.slice(0, 2) === 'on') e.addEventListener(k.slice(2), attrs[k]);
+      else if (attrs[k] !== false && attrs[k] !== null && attrs[k] !== undefined) e.setAttribute(k, attrs[k]);
+    });
+    function add(c) {
+      if (c === null || c === undefined || c === false) return;
+      if (Array.isArray(c)) { c.forEach(add); return; }
+      e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    }
+    for (var i = 2; i < arguments.length; i++) add(arguments[i]);
+    return e;
+  }
+  function newRid() {
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', out = '', i;
+    var buf = new Uint8Array(32);
+    if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(buf);
+    else for (i = 0; i < 32; i++) buf[i] = Math.floor(Math.random() * 256);
+    for (i = 0; i < 32; i++) out += chars.charAt(buf[i] % chars.length);
+    return out;
+  }
+  function lsGet(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { window.localStorage.setItem(k, v); return true; } catch (e) { return false; } }
+  function lsDel(k) { try { window.localStorage.removeItem(k); } catch (e) {} }
+  function hhmm(ms) {
+    var d = new Date(ms);
+    return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+  }
+  function fields() { return Array.prototype.slice.call(document.querySelectorAll('[data-id]')); }
+  function autosize(t) {
+    if (t.tagName !== 'TEXTAREA') return;
+    var min = t.classList.contains('short') ? 54 : (t.closest('td') ? 50 : 112);
+    t.style.height = 'auto';
+    t.style.height = Math.max(min, t.scrollHeight + 2) + 'px';
+  }
+  function collect() {
+    var a = {};
+    fields().forEach(function (f) { if (f.value !== '') a[f.getAttribute('data-id')] = f.value; });
+    return a;
+  }
+  function setField(id, v) {
+    var f = document.querySelector('[data-id="' + id + '"]');
+    if (!f) return;
+    f.value = v; autosize(f); if (f.tagName === 'SELECT') markSelect(f);
+  }
+  function markSelect(sel) { sel.classList.toggle('empty', sel.value === ''); }
+
+  /* 質問文を「本文」と「補足（末尾のかっこ書き）」に分ける */
+  function splitQ(q) {
+    var m = /^(.*?)（([^（）]*)）$/.exec(q);
+    if (!m || !m[1]) return { main: q, sub: '', unit: '' };
+    if (/^(日|円\/時|%|円)$/.test(m[2])) return { main: m[1].trim(), sub: '', unit: m[2] };
+    return { main: m[1].trim(), sub: m[2], unit: '' };
+  }
+  /* 表の見出しを「見出し」と「補足」に分ける */
+  function splitH(t) {
+    var m = /^(.*?)（(.*)）$/.exec(t);
+    return m && m[1] ? { main: m[1], sub: m[2] } : { main: t, sub: '' };
+  }
+  /* 記入例を「入力欄の中の例」と「※の補足」に分ける */
+  function splitEx(ex) {
+    var ph = [], notes = [];
+    String(ex || '').split('\n').forEach(function (l) { (l.charAt(0) === '※' ? notes : ph).push(l); });
+    return { ph: ph.join('\n'), note: notes.join('\n') };
+  }
+
+  /* ---------- 画面の組み立て ---------- */
+  var elStatus, elCount, elNotice, elActions, elMsg, elSubmit, elHp;
+
+  function labelBlock(no, main, sub, required) {
+    return h('div', { class: 'lab' },
+      h('div', { class: 'line' }, no ? h('span', { class: 'no', text: String(no) }) : null, main, required ? h('span', { class: 'req', text: '※' }) : null),
+      sub ? h('div', { class: 'sub', text: sub }) : null);
+  }
+  function row(label, field, wide) {
+    return h('div', { class: 'row' + (wide ? ' wide' : '') }, label, h('div', { class: 'fld' }, field));
+  }
+
+  function render() {
+    var app = document.getElementById('app');
+    app.innerHTML = '';
+    document.title = DEF.meta.title;
+    S.storage = lsSet('hs_test', '1'); lsDel('hs_test');
+    S.groups = [];
+
+    elStatus = h('span', { text: S.storage ? '入力内容は、この端末に自動で保存されます。' : '' });
+    elCount = h('span', { text: '' });
+    elActions = h('div', { class: 'actions' });
+    showRestartButton();
+    app.appendChild(h('div', { class: 'bar' }, h('div', { class: 'left' }, elStatus, elCount), elActions));
+
+    app.appendChild(h('div', { class: 'hero' },
+      h('h1', { text: DEF.meta.title }), h('span', { class: 'rule' }),
+      h('p', { class: 'req-note', text: '※印の欄は入力必須項目となります。それ以外は、分かる範囲でご記入ください。' }),
+      h('p', { class: 'lead', text: DEF.meta.note })));
+    elNotice = h('div', { id: 'notices' });
+    app.appendChild(elNotice);
+
+    // ボット対策の見えない欄（人は入力しません）
+    elHp = h('input', { type: 'text', name: 'website', class: 'hp', tabindex: '-1', autocomplete: 'off', 'aria-hidden': 'true' });
+    app.appendChild(h('div', { class: 'hp', 'aria-hidden': 'true' }, elHp));
+
+    // 基本情報
+    var ph = { company: '例）株式会社サンプル', contact: '例）山田 太郎' };
+    DEF.basic.forEach(function (b) {
+      var inp = h('input', { type: 'text', 'data-id': b.id, autocomplete: 'off', id: 'f_' + b.id, placeholder: ph[b.id] || '' });
+      wire(inp);
+      app.appendChild(row(labelBlock(0, b.label, '', b.required), inp));
+    });
+
+    // 質問
+    var cat = null;
+    DEF.items.forEach(function (it) {
+      if (it.category !== cat) { cat = it.category; app.appendChild(h('h2', { class: 'sec', text: cat })); }
+      app.appendChild(it.type === 'prose' ? renderProse(it) : renderTable(it));
+    });
+
+    // 送信
+    elMsg = h('div', { class: 'msg', role: 'alert' });
+    elSubmit = h('button', { class: 'btn primary', type: 'button', onclick: submit, text: '送信する' });
+    app.appendChild(h('div', { class: 'submit' }, elSubmit, elMsg,
+      h('p', { class: 'lead', text: '分からない項目は空欄のままで構いません。送信後の修正が必要な場合は、担当者までご連絡ください。' })));
+    updateCount();
+  }
+
+  function wire(f) {
+    f.addEventListener('input', function () { autosize(f); markDirty(); });
+  }
+
+  function renderProse(it) {
+    var q = splitQ(it.question), ex = splitEx(it.example);
+    var ta = h('textarea', { 'data-id': it.id, class: it.short ? 'short' : '', id: 'f_' + it.id, 'aria-label': it.question, placeholder: ex.ph });
+    wire(ta);
+    S.groups.push([it.id]);
+    var fld = q.unit
+      ? h('div', { class: 'withunit' }, ta, h('span', { class: 'unit', text: q.unit }))
+      : ta;
+    var box = h('div', {}, fld, ex.note ? h('div', { class: 'hint', text: ex.note }) : null);
+    return row(labelBlock(it.no, q.main, q.sub, false), box);
+  }
+
+  /* 表の列の幅：見出し・選択肢・数字の列は、内容に合わせて調整する */
+  function colWidths(it) {
+    var w = it.cols.map(function (c) { return c.w; });
+    w[0] = Math.max(w[0], 10);
+    it.cols.forEach(function (c, i) {
+      if (i === 0) return;
+      var cells = it.rows.map(function (r) { return r[i]; });
+      var allLabel = cells.every(function (x) { return x.t === 'label'; });
+      if (allLabel) {
+        var mx = 0; cells.forEach(function (x) { mx = Math.max(mx, x.text.length); });
+        w[i] = Math.min(30, Math.max(16, mx * 2.1 + 6));
+      } else if (cells.some(function (x) { return x.t === 'select'; })) {
+        w[i] = 26;
+      } else if (c.numeric) {
+        w[i] = Math.max(w[i], 14);
+      } else if (!c.multiline) {
+        w[i] = Math.max(w[i], 18);
+      }
+    });
+    var sum = w.reduce(function (a, b) { return a + b; }, 0);
+    return w.map(function (x) { return x / sum * 100; });
+  }
+
+  function renderTable(it) {
+    var q = splitQ(it.question);
+    var widths = colWidths(it);
+    var colgroup = h('colgroup');
+    widths.forEach(function (w) { colgroup.appendChild(h('col', { style: 'width:' + w.toFixed(1) + '%' })); });
+
+    var thead = h('thead', {}, h('tr', {}, it.headers.map(function (t, i) {
+      var hh = splitH(t);
+      var sub = (it.cols[i].numeric && hh.sub === '%') ? '' : hh.sub;
+      return h('th', { class: (i === 0 || it.cols[i].numeric) ? 'num' : '' }, hh.main, sub ? h('span', { class: 'hsub', text: sub }) : null);
+    })));
+
+    var tbody = h('tbody');
+    // 記入例の行
+    it.examples.forEach(function (ex) {
+      tbody.appendChild(h('tr', { class: 'exrow' }, ex.map(function (v, i) {
+        if (i === 0) return h('td', { class: 'rowno', 'data-label': '' }, h('span', { class: 'chip', text: '記入例' }));
+        return h('td', { class: it.cols[i].numeric ? 'num' : '', 'data-label': splitH(it.headers[i]).main, text: String(v) });
+      })));
+    });
+    // 入力する行
+    it.rows.forEach(function (r, ri) {
+      var rowLabel = '';
+      r.forEach(function (c) { if (c.t === 'label' && c.text && isNaN(Number(c.text))) rowLabel = c.text; });
+      tbody.appendChild(h('tr', {}, r.map(function (c, i) {
+        var col = it.cols[i], hh = splitH(it.headers[i] || '');
+        if (c.t === 'label') {
+          if (i === 0) return h('td', { class: 'rowno', 'data-label': '', text: c.text !== '' ? c.text : String(ri + 1) });
+          return h('td', { class: 'rowlab', 'data-label': '', text: c.text });
+        }
+        var f, holder;
+        if (c.t === 'select') {
+          f = h('select', { 'data-id': c.id, class: 'empty', 'aria-label': rowLabel + ' ' + hh.main }, h('option', { value: '', text: '選択してください' }));
+          c.options.forEach(function (o) { f.appendChild(h('option', { value: o, text: o })); });
+          f.addEventListener('change', function () { markSelect(f); markDirty(); });
+          holder = f;
+        } else if (col.multiline) {
+          f = h('textarea', { 'data-id': c.id, 'aria-label': rowLabel + ' ' + hh.main, placeholder: hh.main + 'を入力' });
+          wire(f); holder = f;
+        } else if (col.numeric) {
+          f = h('input', { type: 'text', 'data-id': c.id, autocomplete: 'off', inputmode: 'decimal', 'aria-label': rowLabel + ' ' + hh.main, placeholder: '数字' });
+          wire(f);
+          holder = h('div', { class: 'withunit' }, f, h('span', { class: 'unit', text: hh.sub || '' }));
+        } else {
+          f = h('input', { type: 'text', 'data-id': c.id, autocomplete: 'off', 'aria-label': rowLabel + ' ' + hh.main, placeholder: hh.main + 'を入力' });
+          wire(f); holder = f;
+        }
+        return h('td', { class: c.t === 'select' ? 'selcell' : '', 'data-label': hh.main }, holder);
+      })));
+    });
+    S.groups.push(it.rows.reduce(function (a, r) { r.forEach(function (c) { if (c.t !== 'label') a.push(c.id); }); return a; }, []));
+
+    var caption = (q.sub ? q.sub + '\n' : '') + '記入例を参考に、灰色の枠にご記入ください。';
+    var r = row(labelBlock(it.no, q.main, caption, false), h('div', { class: 'tablewrap' }, h('table', {}, colgroup, thead, tbody)), true);
+    r.querySelector('.lab').style.marginBottom = '4px';
+    return r;
+  }
+
+  /* ---------- 入力済みの数 ---------- */
+  function updateCount() {
+    if (!elCount) return;
+    var n = 0;
+    S.groups.forEach(function (ids) {
+      for (var i = 0; i < ids.length; i++) {
+        var f = document.querySelector('[data-id="' + ids[i] + '"]');
+        if (f && f.value !== '') { n++; break; }
+      }
+    });
+    elCount.textContent = '入力済み ' + n + ' / ' + S.groups.length + ' 問';
+  }
+
+  /* ---------- 途中保存（この端末のブラウザに保存） ---------- */
+  function setStatus(t) { if (elStatus) elStatus.textContent = t; }
+  function markDirty() {
+    S.dirty = true;
+    if (S.storage) setStatus('入力中…');
+    updateCount();
+    clearTimeout(S.timer);
+    S.timer = setTimeout(saveNow, 1500);
+  }
+  function saveNow() {
+    if (!S.dirty || !S.storage) return;
+    S.dirty = false;
+    var ok = lsSet(KEY, JSON.stringify({ t: Date.now(), a: collect() }));
+    setStatus(ok ? '自動保存しました（' + hhmm(Date.now()) + '）' : '自動保存できませんでした。');
+  }
+  setInterval(saveNow, 15000);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) saveNow(); });
+  window.addEventListener('pagehide', saveNow);
+
+  function restore() {
+    var raw = lsGet(KEY);
+    if (!raw) return;
+    try {
+      var d = JSON.parse(raw);
+      if (!d || !d.a || Date.now() - d.t > HOURS * 3600 * 1000) { lsDel(KEY); return; }
+      var ids = Object.keys(d.a);
+      if (!ids.length) return;
+      ids.forEach(function (id) { setField(id, d.a[id]); });
+      updateCount();
+      elNotice.appendChild(h('div', { class: 'notice', text: hhmm(d.t) + ' に保存した入力内容を復元しました。続きからご記入ください。' }));
+    } catch (e) { lsDel(KEY); }
+  }
+
+  function showRestartButton() {
+    elActions.innerHTML = '';
+    elActions.appendChild(h('button', { class: 'btn', type: 'button', text: '最初から入力し直す', onclick: askRestart }));
+  }
+  function askRestart() {
+    elActions.innerHTML = '';
+    elActions.appendChild(h('span', { text: '入力した内容をすべて消しますか？' }));
+    elActions.appendChild(h('button', { class: 'btn', type: 'button', text: '消して最初から', onclick: function () {
+      lsDel(KEY);
+      fields().forEach(function (f) { f.value = ''; autosize(f); if (f.tagName === 'SELECT') markSelect(f); });
+      S.dirty = false;
+      elNotice.innerHTML = '';
+      setStatus('入力内容を消去しました。');
+      updateCount();
+      showRestartButton();
+    } }));
+    elActions.appendChild(h('button', { class: 'btn', type: 'button', text: 'やめる', onclick: showRestartButton }));
+  }
+
+  /* ---------- 送信（Apps Scriptの受付へ送る） ---------- */
+  function fail(msg) {
+    S.sending = false;
+    elSubmit.disabled = false; elSubmit.textContent = '送信する';
+    saveNow();
+    elMsg.textContent = msg + ' 入力内容はこの端末に保存されていますので、しばらくしてからもう一度お試しください。';
+  }
+  function submit() {
+    if (S.sending) return;
+    var a = collect();
+    elMsg.textContent = '';
+    var missing = DEF.basic.filter(function (b) { return b.required && !(a[b.id] || '').trim(); });
+    if (missing.length) {
+      elMsg.textContent = missing.map(function (b) { return b.label.replace(/（.*）/, ''); }).join('・') + 'をご記入ください。';
+      var f = document.querySelector('[data-id="' + missing[0].id + '"]');
+      if (f) { f.scrollIntoView({ block: 'center' }); f.focus(); }
+      return;
+    }
+    if (!CONFIG.ENDPOINT) {
+      elMsg.textContent = '送信先が設定されていません。お手数ですが、担当者までご連絡ください。（管理者向け：index.html の CONFIG.ENDPOINT を設定してください）';
+      return;
+    }
+    S.sending = true;
+    elSubmit.disabled = true; elSubmit.textContent = '送信中…';
+    var ctrl = ('AbortController' in window) ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 90000) : null;
+    fetch(CONFIG.ENDPOINT, {
+      method: 'POST',
+      body: JSON.stringify({ rid: RID, answers: a, hp: elHp ? elHp.value : '' }),
+      redirect: 'follow',
+      signal: ctrl ? ctrl.signal : undefined
+    })
+      .then(function (r) { if (timer) clearTimeout(timer); return r.json(); })
+      .then(function (res) {
+        if (res && res.ok) { done(); }
+        else { fail('送信できませんでした。' + (res && res.error ? res.error : '')); }
+      })
+      .catch(function () { if (timer) clearTimeout(timer); fail('通信できませんでした。'); });
+  }
+  function done() {
+    lsDel(KEY);
+    var app = document.getElementById('app');
+    app.innerHTML = '';
+    app.appendChild(h('div', { class: 'done' },
+      h('h1', { text: 'ご回答ありがとうございました。' }),
+      h('p', { text: '送信が完了しました。内容を確認のうえ、担当者よりご連絡いたします。' })));
+  }
+
+  render();
+  restore();
+})();
+</script>
+</body>
+</html>
