@@ -131,6 +131,14 @@
   .photo .pinfo { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 12px; color: var(--sub); }
   .photo input[type=text], .photo select { height: 48px; padding: 10px 14px; }
   .photo select { padding-right: 48px; }
+  .opts { display: grid; gap: 8px; }
+  .optcard { display: flex; gap: 12px; align-items: center; padding: 14px 16px; background: var(--field); border: 1px solid var(--field-line); cursor: pointer; line-height: 1.6; }
+  .optcard.on { background: #fff; border-color: var(--accent); outline: 1px solid var(--accent); }
+  .optcard input { width: 20px; height: 20px; flex: none; accent-color: var(--accent); margin: 0; }
+  .hpdetail { margin-top: 16px; }
+  .hpdetail .pf { margin-bottom: 14px; }
+  .hpdetail .pf > label { display: block; font-size: 13px; font-weight: 700; margin: 0 0 4px; }
+  .hpdetail .pf > label .opt2 { font-weight: 400; color: var(--sub); margin-left: 6px; }
   .consent { display: flex; gap: 12px; align-items: flex-start; margin-top: 8px; padding: 16px; background: var(--field); border: 1px solid var(--field-line); cursor: pointer; line-height: 1.7; }
   .consent input { width: 20px; height: 20px; margin-top: 4px; flex: none; accent-color: var(--accent); }
 
@@ -1209,6 +1217,10 @@ var FORM_DEF = {
     ['other', 'その他のサイトの写真']
   ];
   var CONSENT_TEXT = '添付した写真について、著作権・肖像権などの権利上、事業計画書に使用して問題がないこと（自社で撮影・作成したもの、または掲載の許諾を得ているもの）、および、人の顔が分かる写真を含まないことを確認しました。';
+  var HP_OPTIONS = [['yes', '使用してよい'], ['confirm', '使用する前に、写真ごとに確認してほしい'], ['no', '使用しない']];
+  var HP_CONSENT_TEXT = 'ホームページの写真について、著作権・肖像権などの権利上、事業計画書に使用して問題がないこと（自社で撮影・作成したもの、または使用の許諾を得ているもの）を確認しました。なお、人の顔が分かる写真は使用しません。';
+  var HP = { permission: '', url: '', note: '', confirmed: false };
+  var elHpDetail, elHpConfirmWrap, elHpConfirm, elHpUrl, elHpNote, elHpRadios = [];
   var PH = { list: [], consent: false, msg: '' };
   var elPhotoList, elPhotoAdd, elPhotoMsg, elConsentWrap, elConsent, elFile;
 
@@ -1334,7 +1346,8 @@ var FORM_DEF = {
     });
 
     // 写真の添付
-    app.appendChild(h('h2', { class: 'sec', text: '写真の添付（任意）' }));
+    app.appendChild(h('h2', { class: 'sec', text: '写真について（任意）' }));
+    app.appendChild(renderHp());
     app.appendChild(renderPhotos());
 
     // 送信
@@ -1443,6 +1456,48 @@ var FORM_DEF = {
   }
 
 
+
+  /* ---------- ホームページに掲載している写真の使用可否 ---------- */
+  function renderHp() {
+    var opts = h('div', { class: 'opts', role: 'radiogroup', 'aria-label': 'ホームページに掲載している写真の使用' });
+    elHpRadios = [];
+    HP_OPTIONS.forEach(function (o) {
+      var inp = h('input', { type: 'radio', name: 'hp_permission', value: o[0], id: 'hp_perm_' + o[0] });
+      inp.addEventListener('change', function () { HP.permission = o[0]; refreshHp(); markDirty(); });
+      elHpRadios.push(inp);
+      opts.appendChild(h('label', { class: 'optcard', for: 'hp_perm_' + o[0] }, inp, h('span', { text: o[1] })));
+    });
+    elHpUrl = h('input', { type: 'text', autocomplete: 'off', inputmode: 'url', id: 'hp_url', placeholder: '例）https://www.example.co.jp/' });
+    elHpUrl.addEventListener('input', function () { HP.url = elHpUrl.value; markDirty(); });
+    elHpNote = h('textarea', { class: 'short', id: 'hp_note', placeholder: '例）会社概要のページの写真を使ってほしい／社員が写っている写真は使わないでほしい' });
+    elHpNote.addEventListener('input', function () { HP.note = elHpNote.value; autosize(elHpNote); markDirty(); });
+    elHpConfirm = h('input', { type: 'checkbox', id: 'hp_confirm' });
+    elHpConfirm.addEventListener('change', function () { HP.confirmed = elHpConfirm.checked; markDirty(); });
+    elHpConfirmWrap = h('label', { class: 'consent', for: 'hp_confirm' }, elHpConfirm, h('span', { text: HP_CONSENT_TEXT }));
+    elHpDetail = h('div', { class: 'hpdetail' },
+      h('div', { class: 'pf' }, h('label', {}, 'ホームページのURL', h('span', { class: 'opt2', text: '任意' })), elHpUrl),
+      h('div', { class: 'pf' }, h('label', {}, '補足', h('span', { class: 'opt2', text: '任意・使ってほしい写真、使ってほしくない写真など' })), elHpNote),
+      elHpConfirmWrap);
+    refreshHp();
+    var sub = 'ホームページに掲載されている写真から、事業内容が分かるものを選んで、事業計画書に使用する場合があります。\n人の顔が分かる写真は使用しません。';
+    return row(labelBlock('', '御社のホームページに掲載している写真を、事業計画書に使用してもよいですか。', sub, false), h('div', {}, opts, elHpDetail), true);
+  }
+  function refreshHp() {
+    elHpRadios.forEach(function (r) {
+      r.checked = (r.value === HP.permission);
+      var lab = r.parentNode; if (lab && lab.classList) lab.classList.toggle('on', r.checked);
+    });
+    var show = HP.permission === 'yes' || HP.permission === 'confirm';
+    elHpDetail.style.display = show ? '' : 'none';
+    elHpConfirmWrap.style.display = HP.permission === 'yes' ? '' : 'none';
+    elHpUrl.value = HP.url; elHpNote.value = HP.note; elHpConfirm.checked = !!HP.confirmed;
+    if (show) autosize(elHpNote);
+  }
+  function clearHp() {
+    HP = { permission: '', url: '', note: '', confirmed: false };
+    if (elHpDetail) refreshHp();
+  }
+
   /* ---------- 写真の添付 ---------- */
   function fmtSize(b) { return b >= 1024 * 1024 ? (b / 1024 / 1024).toFixed(1) + 'MB' : Math.max(1, Math.round(b / 1024)) + 'KB'; }
   function dataBytes(dataUrl) { var i = dataUrl.indexOf(','); return Math.floor((dataUrl.length - i - 1) * 3 / 4); }
@@ -1530,7 +1585,7 @@ var FORM_DEF = {
       PHOTO_SOURCES.forEach(function (o) { var op = h('option', { value: o[0], text: o[1] }); if (p.source === o[0]) op.selected = true; src.appendChild(op); });
       var urlIn = h('input', { type: 'text', autocomplete: 'off', inputmode: 'url', placeholder: '例）https://www.example.co.jp/company/', value: p.url, 'aria-label': '写真' + (i + 1) + 'の掲載元のURL' });
       urlIn.addEventListener('input', function () { p.url = urlIn.value; });
-      var urlBox = h('div', { class: 'pf' }, h('label', {}, '掲載元のURL', h('span', { class: 'opt', text: '写真を載せているページのURL' })), urlIn);
+      var urlBox = h('div', { class: 'pf' }, h('label', {}, '掲載元のURL', h('span', { class: 'opt', text: '任意・分かれば、写真を載せているページのURL' })), urlIn);
       urlBox.style.display = (p.source && p.source !== 'own') ? '' : 'none';
       src.addEventListener('change', function () {
         p.source = src.value; src.classList.toggle('empty', !src.value);
@@ -1587,12 +1642,12 @@ var FORM_DEF = {
 
   /* 送信前の写真のチェック。問題があれば、お客様向けの文を返す */
   function checkPhotos() {
+    if (HP.permission === 'yes' && !HP.confirmed) return 'ホームページの写真を使用する場合は、権利の確認（チェック欄）にチェックをお願いします。';
     if (!PH.list.length) return '';
     if (PH.list.some(function (p) { return p.status !== 'ready'; })) return '写真の読み込みが終わるまで、少しお待ちください。';
     for (var i = 0; i < PH.list.length; i++) {
       var p = PH.list[i];
       if (!p.source) return '写真' + (i + 1) + 'の掲載元を選択してください。';
-      if (p.source !== 'own' && !/^https?:\/\/\S+$/i.test((p.url || '').trim())) return '写真' + (i + 1) + 'の掲載元のURLを、「https://」から始まる形でご記入ください。';
     }
     if (!PH.consent) return '写真の権利などの確認（チェック欄）にチェックをお願いします。';
     var total = PH.list.reduce(function (a, p) { return a + p.b64.length; }, 0);
@@ -1630,7 +1685,7 @@ var FORM_DEF = {
   function saveNow() {
     if (!S.dirty || !S.storage) return;
     S.dirty = false;
-    var ok = lsSet(KEY, JSON.stringify({ t: Date.now(), a: collect() }));
+    var ok = lsSet(KEY, JSON.stringify({ t: Date.now(), a: collect(), hp: HP }));
     setStatus(ok ? '自動保存しました（' + hhmm(Date.now()) + '）' : '自動保存できませんでした。');
   }
   setInterval(saveNow, 15000);
@@ -1644,8 +1699,10 @@ var FORM_DEF = {
       var d = JSON.parse(raw);
       if (!d || !d.a || Date.now() - d.t > HOURS * 3600 * 1000) { lsDel(KEY); return; }
       var ids = Object.keys(d.a);
-      if (!ids.length) return;
+      var hasHp = d.hp && d.hp.permission;
+      if (!ids.length && !hasHp) return;
       ids.forEach(function (id) { setField(id, d.a[id]); });
+      if (hasHp) { HP = { permission: d.hp.permission, url: d.hp.url || '', note: d.hp.note || '', confirmed: !!d.hp.confirmed }; refreshHp(); }
       updateCount();
       elNotice.appendChild(h('div', { class: 'notice', text: hhmm(d.t) + ' に保存した入力内容を復元しました。続きからご記入ください。' }));
     } catch (e) { lsDel(KEY); }
@@ -1662,7 +1719,7 @@ var FORM_DEF = {
       lsDel(KEY);
       fields().forEach(function (f) { f.value = ''; autosize(f); if (f.tagName === 'SELECT') markSelect(f); });
       S.dirty = false;
-      clearPhotos();
+      clearPhotos(); clearHp();
       elNotice.innerHTML = '';
       setStatus('入力内容を消去しました。');
       updateCount();
@@ -1703,7 +1760,7 @@ var FORM_DEF = {
     var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, hasPhotos ? 240000 : 90000) : null;
     fetch(CONFIG.ENDPOINT, {
       method: 'POST',
-      body: JSON.stringify({ rid: RID, answers: a, hp: elHp ? elHp.value : '', photos: photosPayload(), photoConsent: PH.list.length ? PH.consent : false }),
+      body: JSON.stringify({ rid: RID, answers: a, hp: elHp ? elHp.value : '', photos: photosPayload(), photoConsent: PH.list.length ? PH.consent : false, hpPhoto: HP.permission ? { permission: HP.permission, url: HP.url.trim(), note: HP.note.trim(), confirmed: HP.confirmed } : null }),
       redirect: 'follow',
       signal: ctrl ? ctrl.signal : undefined
     })
@@ -1716,7 +1773,7 @@ var FORM_DEF = {
   }
   function done() {
     lsDel(KEY);
-    clearPhotos();
+    clearPhotos(); clearHp();
     var app = document.getElementById('app');
     app.innerHTML = '';
     app.appendChild(h('div', { class: 'done' },
