@@ -61,7 +61,12 @@
   .lab .no { position: absolute; left: 0; top: 0; color: var(--sub); font-weight: 400; font-size: 13px; }
   .lab .req { color: var(--accent); margin-left: 4px; }
   .lab .sub { font-weight: 400; font-size: 13px; color: var(--sub); margin: 6px 0 0 28px; line-height: 1.7; white-space: pre-line; }
+  .lab .wants { font-weight: 400; font-size: 13px; color: var(--sub); margin: 6px 0 0 28px; line-height: 1.7; }
   .fld .hint { font-size: 13px; color: var(--sub); margin-top: 8px; }
+  .later { margin-top: 6px; font-size: 13px; color: var(--sub); min-height: 22px; }
+  .later .ltag { margin-right: 10px; }
+  .linkbtn { background: none; border: 0; padding: 0; font: inherit; color: var(--sub); text-decoration: underline; cursor: pointer; }
+  .linkbtn:hover { color: var(--accent); }
   .withunit { display: flex; align-items: center; gap: 10px; }
   .unit { color: var(--sub); white-space: nowrap; }
 
@@ -217,9 +222,17 @@ var FORM_DEF = {
    "no": 1,
    "category": "事業・会社概要",
    "question": "現在の主な事業内容をお聞かせください。（提供しているサービスと、主なお客様）",
-   "example": "例）法人向けに業務用の資材を仕入れて販売しています。主なお客様は地域の建設会社・工務店（約80社）で、受注から配送まで自社で行っています。",
+   "example": "【提供しているサービス】を、【主なお客様】に提供しています。",
    "cell": "D9",
-   "short": false
+   "short": false,
+   "wants": [
+    "提供しているサービス",
+    "主なお客様"
+   ],
+   "checks": [
+    "len"
+   ],
+   "priority": "高"
   },
   {
    "id": "q2",
@@ -227,9 +240,15 @@ var FORM_DEF = {
    "no": 2,
    "category": "事業・会社概要",
    "question": "創業の経緯や、事業運営で大切にされている考え方をお聞かせください。",
-   "example": "例）20XX年に、前職での経験を活かして創業しました。「納期を守る」「小口の注文にも対応する」ことを大切にしています。",
+   "example": "【いつ・どんなきっかけ】で創業しました。大切にしているのは、【考え方】です。",
    "cell": "D10",
-   "short": false
+   "short": false,
+   "wants": [
+    "創業の時期ときっかけ",
+    "大切にしていること"
+   ],
+   "checks": [],
+   "priority": "中"
   },
   {
    "id": "q3",
@@ -237,9 +256,17 @@ var FORM_DEF = {
    "no": 3,
    "category": "事業・会社概要",
    "question": "会社の規模をお聞かせください。（従業員数、拠点の有無など）",
-   "example": "例）従業員15名（正社員10名、パート5名）。本社と倉庫の2拠点です。",
+   "example": "従業員は【○】名（うち正社員【○】名）、拠点は【○】か所です。",
    "cell": "D11",
-   "short": false
+   "short": false,
+   "wants": [
+    "従業員数",
+    "拠点の数"
+   ],
+   "checks": [
+    "num"
+   ],
+   "priority": "低"
   },
   {
    "id": "q4",
@@ -247,9 +274,15 @@ var FORM_DEF = {
    "no": 4,
    "category": "事業・会社概要",
    "question": "5年後、10年後に目指されている姿をお聞かせください。",
-   "example": "例）地域で最も頼りにされる資材の供給元になりたいと考えています。商圏を広げつつ、従業員が無理なく働ける体制を整えたいです。",
+   "example": "【5年後・10年後の姿】を目指し、そのために【取り組みたいこと】を進めたいです。",
    "cell": "D12",
-   "short": false
+   "short": false,
+   "wants": [
+    "目指す姿",
+    "そのための取り組み"
+   ],
+   "checks": [],
+   "priority": "中"
   },
   {
    "id": "q5",
@@ -379,7 +412,8 @@ var FORM_DEF = {
       "cell": "E19"
      }
     ]
-   ]
+   ],
+   "priority": "低"
   },
   {
    "id": "q6",
@@ -425,8 +459,8 @@ var FORM_DEF = {
     [
      "例",
      70,
-     "資材の販売",
-     "建設会社向けの資材の販売と配送。利益は安定している",
+     "○○の販売",
+     "主力の商品・サービス。利益は安定している",
      "横ばい"
     ]
    ],
@@ -509,7 +543,8 @@ var FORM_DEF = {
       "cell": "E26"
      }
     ]
-   ]
+   ],
+   "priority": "高"
   },
   {
    "id": "q7",
@@ -517,9 +552,18 @@ var FORM_DEF = {
    "no": 7,
    "category": "取引・サービス",
    "question": "顧客構成をお聞かせください。（法人・個人の別、お客様の数、新規とリピートの比率、特定のお客様への売上の偏りなど）",
-   "example": "例）法人9割・個人1割。お客様数は約120社。新規3割・リピート7割。上位3社で売上の約50%を占めています。",
+   "example": "お客様は【法人／個人】が中心で、【○】社ほどです。新規【○】割、リピート【○】割です。",
    "cell": "D29",
-   "short": false
+   "short": false,
+   "wants": [
+    "法人・個人の別",
+    "お客様の数",
+    "新規とリピートの比率"
+   ],
+   "checks": [
+    "num"
+   ],
+   "priority": "低"
   },
   {
    "id": "q8",
@@ -527,9 +571,17 @@ var FORM_DEF = {
    "no": 8,
    "category": "強み・競合",
    "question": "自社の強みと弱みをお聞かせください。",
-   "example": "例）強み：即日配送に対応できる点、担当者が現場の事情に詳しい点。\n弱み：受注や在庫の管理が担当者ごとに異なり、繁忙期に対応が遅れやすい点。",
+   "example": "強みは【○○】です。弱みは【○○】です。",
    "cell": "D30",
-   "short": false
+   "short": false,
+   "wants": [
+    "強み",
+    "弱み"
+   ],
+   "checks": [
+    "len"
+   ],
+   "priority": "高"
   },
   {
    "id": "q9",
@@ -537,9 +589,17 @@ var FORM_DEF = {
    "no": 9,
    "category": "強み・競合",
    "question": "主な競合と、競合との差別化のポイントをお聞かせください。",
-   "example": "例）近隣の同業2社（A社、B社）が競合です。A社は価格が安い一方、当社は小口注文・即日対応で差別化しています。",
+   "example": "競合は【社名や業態】で、当社は【違い】で差別化しています。",
    "cell": "D31",
-   "short": false
+   "short": false,
+   "wants": [
+    "競合の名前や業態",
+    "競合との違い"
+   ],
+   "checks": [
+    "len"
+   ],
+   "priority": "高"
   },
   {
    "id": "q10",
@@ -547,9 +607,19 @@ var FORM_DEF = {
    "no": 10,
    "category": "現状の業務",
    "question": "業務の流れの中で、特に手間や時間がかかっている作業をお聞かせください。",
-   "example": "例）電話・FAXで受けた注文を、毎回手作業で台帳に転記する作業に時間がかかっています。1日あたり約2時間です。",
+   "example": "【作業名】を、【頻度】、1回あたり約【時間】かけて行っています。",
    "cell": "D32",
-   "short": false
+   "short": false,
+   "wants": [
+    "作業名",
+    "頻度",
+    "1回にかかる時間"
+   ],
+   "checks": [
+    "freq",
+    "time"
+   ],
+   "priority": "高"
   },
   {
    "id": "q11",
@@ -557,9 +627,18 @@ var FORM_DEF = {
    "no": 11,
    "category": "現状の業務",
    "question": "紙・Excel・口頭などで管理されている業務や、特定の担当者に依存している業務があればお聞かせください。",
-   "example": "例）在庫の管理はExcelで行っており、更新方法を把握しているのはベテラン担当者1名のみです。",
+   "example": "【業務名】は、【担当者（人数）】しか分からず、【困っていること】があります。",
    "cell": "D33",
-   "short": false
+   "short": false,
+   "wants": [
+    "業務名",
+    "担当者の人数",
+    "困っていること"
+   ],
+   "checks": [
+    "len"
+   ],
+   "priority": "中"
   },
   {
    "id": "q12",
@@ -567,9 +646,18 @@ var FORM_DEF = {
    "no": 12,
    "category": "現状の業務",
    "question": "ミスや漏れが起きやすい作業があればお聞かせください。",
-   "example": "例）注文内容の転記ミスにより、月に2〜3件、誤出荷や納品遅れが発生しています。",
+   "example": "【作業名】で、【どんなミス】が【頻度・件数】起きています。",
    "cell": "D34",
-   "short": false
+   "short": false,
+   "wants": [
+    "作業名",
+    "どんなミスか",
+    "頻度・件数"
+   ],
+   "checks": [
+    "freq"
+   ],
+   "priority": "中"
   },
   {
    "id": "q13",
@@ -577,9 +665,18 @@ var FORM_DEF = {
    "no": 13,
    "category": "現状の業務",
    "question": "人手不足の状況をお聞かせください。（欠員、退職、採用状況、残業時間など）",
-   "example": "例）事務担当が1名退職し、半年間補充できていません。事務担当の月平均残業は約30時間です。",
+   "example": "【職種】が【○】名不足しています。月の残業は約【○】時間です。",
    "cell": "D35",
-   "short": false
+   "short": false,
+   "wants": [
+    "不足している人数",
+    "残業時間",
+    "採用の状況"
+   ],
+   "checks": [
+    "num"
+   ],
+   "priority": "高"
   },
   {
    "id": "q14",
@@ -587,9 +684,17 @@ var FORM_DEF = {
    "no": 14,
    "category": "今後の見通し",
    "question": "今後、需要の拡大が見込まれる市場やお客様の動きがあればお聞かせください。",
-   "example": "例）近隣で新築・リフォームの案件が増えており、資材の問い合わせが前年より増えています。",
+   "example": "【分野・お客様の動き】で、【根拠】から、需要が増えそうです。",
    "cell": "D36",
-   "short": false
+   "short": false,
+   "wants": [
+    "どの分野か",
+    "そう考える根拠"
+   ],
+   "checks": [
+    "len"
+   ],
+   "priority": "中"
   },
   {
    "id": "q15",
@@ -597,9 +702,17 @@ var FORM_DEF = {
    "no": 15,
    "category": "今後の見通し",
    "question": "現在のやり方を続けた場合に、限界や不安を感じる点をお聞かせください。",
-   "example": "例）注文が増えても現在の人数では対応しきれず、お断りする場面が出ています。担当者が退職すると業務が回らなくなる不安があります。",
+   "example": "【何が限界か】で、このまま続けると【どうなるか】が不安です。",
    "cell": "D37",
-   "short": false
+   "short": false,
+   "wants": [
+    "何が限界か",
+    "続けるとどうなるか"
+   ],
+   "checks": [
+    "len"
+   ],
+   "priority": "中"
   },
   {
    "id": "q16",
@@ -607,9 +720,17 @@ var FORM_DEF = {
    "no": 16,
    "category": "今後の見通し",
    "question": "競合、人材確保、コスト上昇など、今後の経営に影響が出そうな外部要因をお聞かせください。",
-   "example": "例）競合の値下げ、事務担当の採用難、仕入価格と物流費の上昇が影響しそうです。",
+   "example": "【要因】により、【どんな影響】が出そうです。",
    "cell": "D38",
-   "short": false
+   "short": false,
+   "wants": [
+    "要因",
+    "どんな影響か"
+   ],
+   "checks": [
+    "len"
+   ],
+   "priority": "中"
   },
   {
    "id": "q17",
@@ -617,9 +738,18 @@ var FORM_DEF = {
    "no": 17,
    "category": "業務効率化で生まれる時間の使い道",
    "question": "システム導入により削減できた時間を、誰が、どの業務に充てたいとお考えですか。",
-   "example": "例）事務担当2名が、月40時間ずつ新規のお客様への提案・フォロー営業に充てたいです。",
+   "example": "【誰】が、【どんな業務】に、月【○】時間くらい充てたいです。",
    "cell": "D39",
-   "short": false
+   "short": false,
+   "wants": [
+    "誰が",
+    "何に",
+    "何時間"
+   ],
+   "checks": [
+    "time"
+   ],
+   "priority": "高"
   },
   {
    "id": "q18",
@@ -627,9 +757,17 @@ var FORM_DEF = {
    "no": 18,
    "category": "業務効率化で生まれる時間の使い道",
    "question": "その業務に時間を充てることで、売上や利益がどのように伸びる見込みですか。根拠もお聞かせください。",
-   "example": "例）現在、対応しきれず月5件ほどお断りしている案件があり、1件あたり平均30万円です。受けられれば、年間約1,800万円の売上増を見込んでいます。",
+   "example": "【理由】により、月【○】件・単価【○】円ほど、売上が増える見込みです。",
    "cell": "D40",
-   "short": false
+   "short": false,
+   "wants": [
+    "増える理由",
+    "件数や金額の目安"
+   ],
+   "checks": [
+    "num"
+   ],
+   "priority": "高"
   },
   {
    "id": "q19",
@@ -637,9 +775,17 @@ var FORM_DEF = {
    "no": 19,
    "category": "業務効率化で生まれる時間の使い道",
    "question": "新規顧客の開拓、新サービス、価格の見直しなどで、取り組みたいことがあればお聞かせください。",
-   "example": "例）近隣エリアの工務店への新規営業を強化したいです。あわせて、小口配送の料金体系を見直したいです。",
+   "example": "【新規開拓・新サービス・価格の見直し】として、【具体的な内容】に取り組みたいです。",
    "cell": "D41",
-   "short": false
+   "short": false,
+   "wants": [
+    "取り組みたいこと",
+    "対象や内容"
+   ],
+   "checks": [
+    "len"
+   ],
+   "priority": "中"
   },
   {
    "id": "q20",
@@ -647,9 +793,17 @@ var FORM_DEF = {
    "no": 20,
    "category": "業務効率化で生まれる時間の使い道",
    "question": "従業員のスキル向上のために、予定または希望されていることがあればお聞かせください。（研修、資格取得など）",
-   "example": "例）営業担当向けの提案力研修、事務担当向けのシステム操作研修を予定しています。",
+   "example": "【誰】に【どんな研修・資格】を、予定（希望）しています。",
    "cell": "D42",
-   "short": false
+   "short": false,
+   "wants": [
+    "対象者",
+    "内容"
+   ],
+   "checks": [
+    "len"
+   ],
+   "priority": "中"
   },
   {
    "id": "q21",
@@ -657,9 +811,17 @@ var FORM_DEF = {
    "no": 21,
    "category": "業務効率化で生まれる時間の使い道",
    "question": "システム導入により削減できそうなコストがあればお聞かせください。（外注費、残業代、ミスによる損失など）",
-   "example": "例）残業代が月約10万円、誤出荷による再配送費が月約3万円あり、これらの削減を見込んでいます。\n※概算で結構です",
+   "example": "【コストの種類】が、月【○】円ほどかかっており、減らせる見込みです。\n※概算で結構です",
    "cell": "D43",
-   "short": false
+   "short": false,
+   "wants": [
+    "コストの種類",
+    "金額の目安"
+   ],
+   "checks": [
+    "num"
+   ],
+   "priority": "中"
   },
   {
    "id": "q22",
@@ -750,7 +912,8 @@ var FORM_DEF = {
       "cell": "D50"
      }
     ]
-   ]
+   ],
+   "priority": "高"
   },
   {
    "id": "q23",
@@ -758,9 +921,18 @@ var FORM_DEF = {
    "no": 23,
    "category": "売上・人員・数字",
    "question": "現時点で決まっている、今後の採用・退職・休職の予定をお聞かせください。",
-   "example": "例）来期に事務担当を1名採用予定です。2年以内に定年退職予定の方が2名、来年春から1年間、育児休業を取得予定の方が1名います。\n※決まっている範囲で結構です",
+   "example": "【いつ頃】に、【誰（職種）】が【採用・退職・休職】の予定です。\n※決まっている範囲で結構です",
    "cell": "D53",
-   "short": false
+   "short": false,
+   "wants": [
+    "時期",
+    "対象（職種など）",
+    "人数"
+   ],
+   "checks": [
+    "len"
+   ],
+   "priority": "高"
   },
   {
    "id": "q24",
@@ -768,9 +940,16 @@ var FORM_DEF = {
    "no": 24,
    "category": "売上・人員・数字",
    "question": "会社全体の年間稼働日数をお聞かせください。（日）",
-   "example": "例）約250日（土日祝日は休み）\n※おおよその日数で結構です",
+   "example": "約【○】日（土日祝休みなど）\n※おおよその日数で結構です",
    "cell": "D54",
-   "short": true
+   "short": true,
+   "wants": [
+    "年間の稼働日数"
+   ],
+   "checks": [
+    "num"
+   ],
+   "priority": "低"
   },
   {
    "id": "q25",
@@ -778,9 +957,16 @@ var FORM_DEF = {
    "no": 25,
    "category": "売上・人員・数字",
    "question": "従業員・役員の時給の平均額をお聞かせください。（円/時）",
-   "example": "例）約2,000円/時（月給32万円 ÷ 月の勤務時間160時間）\n※概算で結構です",
+   "example": "約【○】円/時\n※概算で結構です",
    "cell": "D55",
-   "short": true
+   "short": true,
+   "wants": [
+    "平均の時給"
+   ],
+   "checks": [
+    "num"
+   ],
+   "priority": "低"
   },
   {
    "id": "q26",
@@ -950,7 +1136,8 @@ var FORM_DEF = {
       "cell": "D64"
      }
     ]
-   ]
+   ],
+   "priority": "中"
   },
   {
    "id": "q27",
@@ -1085,7 +1272,8 @@ var FORM_DEF = {
       "cell": "D73"
      }
     ]
-   ]
+   ],
+   "priority": "高"
   },
   {
    "id": "q28",
@@ -1193,7 +1381,8 @@ var FORM_DEF = {
       "cell": "D80"
      }
     ]
-   ]
+   ],
+   "priority": "低"
   }
  ]
 };
@@ -1223,6 +1412,7 @@ var FORM_DEF = {
   var HP = { permission: '', url: '', note: '' };
   var elHpDetail, elHpUrl, elHpNote, elHpRadios = [];
   var PH = { list: [], consent: false, msg: '' };
+  var LATER = {}, laterEls = {};   // 「分からない・あとで」を押した質問
   var elPhotoList, elPhotoAdd, elPhotoMsg, elConsentRow, elConsentWrap, elConsent, elConsentText, elFile;
 
   /* ---------- 小さな道具 ---------- */
@@ -1298,11 +1488,29 @@ var FORM_DEF = {
   /* ---------- 画面の組み立て ---------- */
   var elStatus, elCount, elNotice, elActions, elMsg, elSubmit, elHp;
 
-  function labelBlock(no, main, sub, required) {
+  function labelBlock(no, main, sub, required, wants) {
     return h('div', { class: 'lab' },
       h('div', { class: 'line' }, no ? h('span', { class: 'no', text: String(no) }) : null, main, required ? h('span', { class: 'req', text: '※' }) : null),
-      sub ? h('div', { class: 'sub', text: sub }) : null);
+      sub ? h('div', { class: 'sub', text: sub }) : null,
+      (wants && wants.length >= 2) ? h('div', { class: 'wants', text: '書いてほしいこと：' + wants.join('／') }) : null);
   }
+  /* 「分からない・あとで」（押すと、その質問は、あとで確認する質問として記録されます） */
+  function laterControl(id) {
+    var w = h('div', { class: 'later' });
+    laterEls[id] = w; refreshLater(id);
+    return w;
+  }
+  function refreshLater(id) {
+    var w = laterEls[id]; if (!w) return;
+    w.innerHTML = '';
+    if (LATER[id]) {
+      w.appendChild(h('span', { class: 'ltag', text: '「分からない・あとで」にしました' }));
+      w.appendChild(h('button', { class: 'linkbtn', type: 'button', text: '取り消す', onclick: function () { delete LATER[id]; refreshLater(id); markDirty(); } }));
+    } else {
+      w.appendChild(h('button', { class: 'linkbtn', type: 'button', text: '分からない・あとで', onclick: function () { LATER[id] = true; refreshLater(id); markDirty(); } }));
+    }
+  }
+  function clearLater(id) { if (id && LATER[id]) { delete LATER[id]; refreshLater(id); } }
   function row(label, field, wide) {
     return h('div', { class: 'row' + (wide ? ' wide' : '') }, label, h('div', { class: 'fld' }, field));
   }
@@ -1360,20 +1568,21 @@ var FORM_DEF = {
     updateCount();
   }
 
-  function wire(f) {
-    f.addEventListener('input', function () { autosize(f); markDirty(); });
+  function wire(f, gid) {
+    f.addEventListener('input', function () { autosize(f); clearLater(gid); markDirty(); });
   }
 
   function renderProse(it) {
     var q = splitQ(it.question), ex = splitEx(it.example);
     var ta = h('textarea', { 'data-id': it.id, class: it.short ? 'short' : '', id: 'f_' + it.id, 'aria-label': it.question, placeholder: ex.ph });
-    wire(ta);
+    wire(ta, it.id);
     S.groups.push([it.id]);
     var fld = q.unit
       ? h('div', { class: 'withunit' }, ta, h('span', { class: 'unit', text: q.unit }))
       : ta;
-    var box = h('div', {}, fld, ex.note ? h('div', { class: 'hint', text: ex.note }) : null);
-    return row(labelBlock(it.no, q.main, q.sub, false), box);
+    var hasWants = it.wants && it.wants.length >= 2;
+    var box = h('div', {}, fld, ex.note ? h('div', { class: 'hint', text: ex.note }) : null, laterControl(it.id));
+    return row(labelBlock(it.no, q.main, hasWants ? '' : q.sub, false, it.wants), box);
   }
 
   /* 表の列の幅：見出し・選択肢・数字の列は、内容に合わせて調整する */
@@ -1433,18 +1642,18 @@ var FORM_DEF = {
         if (c.t === 'select') {
           f = h('select', { 'data-id': c.id, class: 'empty', 'aria-label': rowLabel + ' ' + hh.main }, h('option', { value: '', text: '選択してください' }));
           c.options.forEach(function (o) { f.appendChild(h('option', { value: o, text: o })); });
-          f.addEventListener('change', function () { markSelect(f); markDirty(); });
+          f.addEventListener('change', function () { markSelect(f); clearLater(it.id); markDirty(); });
           holder = f;
         } else if (col.multiline) {
           f = h('textarea', { 'data-id': c.id, 'aria-label': rowLabel + ' ' + hh.main, placeholder: hh.main + 'を入力' });
-          wire(f); holder = f;
+          wire(f, it.id); holder = f;
         } else if (col.numeric) {
           f = h('input', { type: 'text', 'data-id': c.id, autocomplete: 'off', inputmode: 'decimal', 'aria-label': rowLabel + ' ' + hh.main, placeholder: '数字' });
-          wire(f);
+          wire(f, it.id);
           holder = h('div', { class: 'withunit' }, f, h('span', { class: 'unit', text: hh.sub || '' }));
         } else {
           f = h('input', { type: 'text', 'data-id': c.id, autocomplete: 'off', 'aria-label': rowLabel + ' ' + hh.main, placeholder: hh.main + 'を入力' });
-          wire(f); holder = f;
+          wire(f, it.id); holder = f;
         }
         return h('td', { class: c.t === 'select' ? 'selcell' : '', 'data-label': hh.main }, holder);
       })));
@@ -1452,7 +1661,7 @@ var FORM_DEF = {
     S.groups.push(it.rows.reduce(function (a, r) { r.forEach(function (c) { if (c.t !== 'label') a.push(c.id); }); return a; }, []));
 
     var caption = (q.sub ? q.sub + '\n' : '') + '記入例を参考に、灰色の枠にご記入ください。';
-    var r = row(labelBlock(it.no, q.main, caption, false), h('div', { class: 'tablewrap' }, h('table', {}, colgroup, thead, tbody)), true);
+    var r = row(labelBlock(it.no, q.main, caption, false), h('div', {}, h('div', { class: 'tablewrap' }, h('table', {}, colgroup, thead, tbody)), laterControl(it.id)), true);
     r.querySelector('.lab').style.marginBottom = '4px';
     return r;
   }
@@ -1684,7 +1893,8 @@ var FORM_DEF = {
         if (f && f.value !== '') { n++; break; }
       }
     });
-    elCount.textContent = '入力済み ' + n + ' / ' + S.groups.length + ' 問';
+    var lc = Object.keys(LATER).length;
+    elCount.textContent = '入力済み ' + n + ' / ' + S.groups.length + ' 問' + (lc ? '（あとで ' + lc + '）' : '');
   }
 
   /* ---------- 途中保存（この端末のブラウザに保存） ---------- */
@@ -1699,7 +1909,7 @@ var FORM_DEF = {
   function saveNow() {
     if (!S.dirty || !S.storage) return;
     S.dirty = false;
-    var ok = lsSet(KEY, JSON.stringify({ t: Date.now(), a: collect(), hp: HP, consent: PH.consent }));
+    var ok = lsSet(KEY, JSON.stringify({ t: Date.now(), a: collect(), hp: HP, consent: PH.consent, later: Object.keys(LATER) }));
     setStatus(ok ? '自動保存しました（' + hhmm(Date.now()) + '）' : '自動保存できませんでした。');
   }
   setInterval(saveNow, 15000);
@@ -1714,8 +1924,10 @@ var FORM_DEF = {
       if (!d || !d.a || Date.now() - d.t > HOURS * 3600 * 1000) { lsDel(KEY); return; }
       var ids = Object.keys(d.a);
       var hasHp = d.hp && d.hp.permission;
-      if (!ids.length && !hasHp) return;
+      var laterIds = Array.isArray(d.later) ? d.later : [];
+      if (!ids.length && !hasHp && !laterIds.length) return;
       ids.forEach(function (id) { setField(id, d.a[id]); });
+      laterIds.forEach(function (id) { if (laterEls[id]) { LATER[id] = true; refreshLater(id); } });
       if (hasHp) { HP = { permission: d.hp.permission, url: d.hp.url || '', note: d.hp.note || '' }; PH.consent = !!d.consent && HP.permission === 'yes'; refreshHp(); refreshConsent(); }
       updateCount();
       elNotice.appendChild(h('div', { class: 'notice', text: hhmm(d.t) + ' に保存した入力内容を復元しました。続きからご記入ください。' }));
@@ -1733,7 +1945,7 @@ var FORM_DEF = {
       lsDel(KEY);
       fields().forEach(function (f) { f.value = ''; autosize(f); if (f.tagName === 'SELECT') markSelect(f); });
       S.dirty = false;
-      clearPhotos(); clearHp();
+      clearPhotos(); clearHp(); LATER = {}; Object.keys(laterEls).forEach(refreshLater);
       elNotice.innerHTML = '';
       setStatus('入力内容を消去しました。');
       updateCount();
@@ -1774,7 +1986,7 @@ var FORM_DEF = {
     var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, hasPhotos ? 240000 : 90000) : null;
     fetch(CONFIG.ENDPOINT, {
       method: 'POST',
-      body: JSON.stringify({ rid: RID, answers: a, hp: elHp ? elHp.value : '', photos: photosPayload(), photoConsent: PH.list.length ? PH.consent : false, consentText: (consentNeeded() && PH.consent) ? consentText() : '', hpPhoto: HP.permission ? { permission: HP.permission, url: HP.url.trim(), note: HP.note.trim(), confirmed: HP.permission === 'yes' && PH.consent } : null }),
+      body: JSON.stringify({ rid: RID, answers: a, hp: elHp ? elHp.value : '', photos: photosPayload(), photoConsent: PH.list.length ? PH.consent : false, consentText: (consentNeeded() && PH.consent) ? consentText() : '', later: Object.keys(LATER), hpPhoto: HP.permission ? { permission: HP.permission, url: HP.url.trim(), note: HP.note.trim(), confirmed: HP.permission === 'yes' && PH.consent } : null }),
       redirect: 'follow',
       signal: ctrl ? ctrl.signal : undefined
     })
@@ -1787,7 +1999,7 @@ var FORM_DEF = {
   }
   function done() {
     lsDel(KEY);
-    clearPhotos(); clearHp();
+    clearPhotos(); clearHp(); LATER = {};
     var app = document.getElementById('app');
     app.innerHTML = '';
     app.appendChild(h('div', { class: 'done' },
