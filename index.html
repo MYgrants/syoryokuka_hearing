@@ -197,7 +197,9 @@ var FORM_DEF = {
  "basic": [
   {
    "id": "company",
-   "label": "会社名（正式名称）",
+   "label": "法人名（正式名称）／代表者氏名",
+   "sub": "法人の方は法人名（正式名称）を、個人事業主の方は代表者の氏名をご記入ください。",
+   "placeholder": "例）株式会社サンプル　／　個人事業主の方は「山田 太郎」",
    "cell": "C4",
    "required": true
   },
@@ -1332,9 +1334,9 @@ var FORM_DEF = {
     // 基本情報
     var ph = { company: '例）株式会社サンプル', contact: '例）山田 太郎' };
     DEF.basic.forEach(function (b) {
-      var inp = h('input', { type: 'text', 'data-id': b.id, autocomplete: 'off', id: 'f_' + b.id, placeholder: ph[b.id] || '' });
+      var inp = h('input', { type: 'text', 'data-id': b.id, autocomplete: 'off', id: 'f_' + b.id, placeholder: b.placeholder || ph[b.id] || '' });
       wire(inp);
-      app.appendChild(row(labelBlock(0, b.label, '', b.required), inp));
+      app.appendChild(row(labelBlock(0, b.label, b.sub || '', b.required), inp));
     });
 
     // 質問
